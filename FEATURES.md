@@ -20,8 +20,47 @@ This document provides a deep-dive technical specification for the core features
 
 ---
 
-## 2. The 6-Agent Pipeline Mechanics
-To showcase high **Agentic Depth (20%)**, the backend orchestrates a pipeline of focused agents. To stay within rate limits (Gemini Free Tier: 15 RPM), the agents are executed sequentially as helper modules. They are unified under a single structural session call but log independent step statuses.
+## 2. Image Hashing & Duplicate Prevention (dHash)
+To prevent points farming and duplicate spam (a major issue in real 311 apps), the backend implements a geospatial perception hashing check:
+1. **Hash Generation:** On upload, the server rescales the image to an 8x9 grayscale grid and computes a 64-bit difference hash (dHash).
+2. **Geographical Filter:** The server queries Firestore for unresolved issues located within a 50-meter bounding box:
+   $$\Delta \text{Latitude} \le 0.00045, \quad \Delta \text{Longitude} \le 0.00045$$
+3. **Distance Calculation:** It computes the Hamming Distance between the new image hash and the retrieved active hashes.
+4. **Resolution:**
+   - If **Hamming Distance $\le$ 10** (indicating near-identical images) and geodistance $\le$ 50 meters: The report is instantly linked as a duplicate of the existing issue. The reporter is prompted to "upvote" instead of creating a new pin, transferring their engagement to the existing issue.
+
+---
+
+## 3. Open311 v2 GeoReport Compliance
+The application acts as a standard Open311 endpoint. This ensures interoperability with municipal CRMs.
+
+### Endpoints:
+* **GET `/api/open311/v2/services.json`**
+  - *Response:* List of service codes matching our category definitions:
+    ```json
+    [
+      {
+        "service_code": "001",
+        "service_name": "Pothole",
+        "type": "realtime",
+        "description": "Potholes or surface degradation on municipal roadways"
+      },
+      {
+        "service_code": "002",
+        "service_name": "Streetlight",
+        "type": "realtime",
+        "description": "Broken or non-functioning streetlights"
+      }
+    ]
+    ```
+* **POST `/api/open311/v2/requests.json`**
+  - *Payload:* `service_code`, `lat`, `long`, `address_string`, `description`, `media_url`, `email`.
+  - *Process:* Parses the standard Open311 payload and creates a Firestore document in the `issues` collection, triggering the AI categorization pipeline in the background.
+
+---
+
+## 4. The 6-Agent Pipeline Mechanics
+To showcase high **Agentic Depth (20% weight)**, the backend orchestrates a pipeline of focused agents. To stay within rate limits (Gemini Free Tier: 15 RPM), the agents are executed sequentially as helper modules. They are unified under a single structural session call but log independent step statuses.
 
 ```
 Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Agent] 
@@ -53,7 +92,7 @@ Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Ag
 
 ---
 
-## 3. Geospatial & Maps Integration
+## 5. Geospatial & Maps Integration
 * **Visual Map Interface:** Leaflet.js with Google Maps tile layers for high-performance responsive mapping.
 * **Map Markers:** Customized SVG pins indicating issue type and status:
   - Red = Critical/Unresolved
@@ -64,7 +103,7 @@ Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Ag
 
 ---
 
-## 4. Crowdsourced Consensus & Trust System
+## 6. Crowdsourced Consensus & Trust System
 * **Consensus Engine:**
   - Active citizens view reported issues in their proximity.
   - Votes: `Confirm` (adds +1 verification weight) vs `Spam` (adds -1 verification weight).
@@ -79,7 +118,7 @@ Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Ag
 
 ---
 
-## 5. Gamification Mechanics
+## 7. Gamification Mechanics
 * **Civic Point Allocation:**
   - Report Approved: +10 pts
   - Valid Verification (voting with consensus): +5 pts
@@ -92,7 +131,7 @@ Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Ag
 
 ---
 
-## 6. Predictive Hotspot Analysis
+## 8. Predictive Hotspot Analysis
 * **Cluster Mapping:** Evaluates coordinate clusters using a spatial boundary algorithm.
 * **Hotspot Indicators:** Highlighting areas on the map using semi-transparent red circles (heatmaps) where reports exceed 5 incidents per week.
 * **Predictive Alerts:** If water leak reports spike within a 100m grid over 24 hours, the system raises a predictive alert: "Possible Water Main Break detected in Sector B."

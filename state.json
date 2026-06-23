@@ -1,23 +1,23 @@
 {
-  "loop_id": "spec-hardening",
+  "loop_id": "feature-enrichment",
   "status": "success",
-  "last_run": "2026-06-23T17:37:44Z",
-  "current_goal": "Harden technical specifications, tech stack, and verification documentation for Community Hero",
+  "last_run": "2026-06-23T17:40:30Z",
+  "current_goal": "Integrate Open311 standards and advanced features into specification documents",
   "active_checklist": [
     {
-      "task": "Create TECH_STACK.md with versions and API key requirements",
+      "task": "Update PRD.md with Open311 v2 compliance, image hashing, and offline-first drafting",
       "status": "completed"
     },
     {
-      "task": "Create VERIFICATION.md mapping hackathon criteria to automated and manual checks",
+      "task": "Update FEATURES.md with Open311 endpoint details and duplicate-prevention algorithms",
       "status": "completed"
     },
     {
-      "task": "Embed layout mockup reference and update DESIGN.md",
+      "task": "Update ARCHITECTURE.md with Open311 data structures and Firestore schemas",
       "status": "completed"
     },
     {
-      "task": "Audit loop readiness score",
+      "task": "Run loop step and verify cost limits",
       "status": "completed"
     }
   ],

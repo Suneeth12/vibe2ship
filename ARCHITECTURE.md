@@ -49,7 +49,7 @@ Issues progress through a structured lifecycle managed by the database and agent
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft : User starts report
+    [*] --> Draft : User starts report (local/offline)
     Draft --> Submitted : Media uploaded & form sent
     Submitted --> Triage_Check : Triage Agent evaluates
     Triage_Check --> Rejected : Junk/Spam/Unsafe (End)
@@ -102,7 +102,12 @@ stateDiagram-v2
   "createdAt": "2026-06-23T14:30:00Z",
   "updatedAt": "2026-06-23T15:10:00Z",
   "workOrderSummary": "Repair standard asphalt pothole. High hazard. Department: Public Works.",
-  "isDuplicateOf": null
+  "isDuplicateOf": null,
+  "open311": {
+    "service_code": "001",
+    "service_request_id": "req_98765",
+    "agency_responsible": "City Department of Transportation"
+  }
 }
 ```
 
@@ -115,6 +120,18 @@ stateDiagram-v2
   "vote": "Confirm",
   "voterTrustScore": 75,
   "votedAt": "2026-06-23T15:05:00Z"
+}
+```
+
+### Collection: `imageHashes`
+*Document ID: Auto-generated*
+```json
+{
+  "hash": "a1b2c3d4e5f60718",
+  "issueId": "issueId_xyz987",
+  "latitude": 47.6062,
+  "longitude": -122.3321,
+  "createdAt": "2026-06-23T14:30:00Z"
 }
 ```
 

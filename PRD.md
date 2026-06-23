@@ -4,27 +4,29 @@
 * **Project Name:** Community Hero
 * **Problem Statement:** Hyperlocal Problem Solver. Communities frequently face infrastructure and environmental issues (potholes, water leakages, damaged streetlights, waste accumulation). Existing reporting channels are fragmented, slow, opaque, and lack citizen engagement.
 * **Core Solution:** A web application combining Google AI Studio (Gemini 1.5 Flash/Pro), Google Maps Platform, and Firebase. Citizens report issues via image or video, an autonomous multi-agent pipeline categorizes and routes them, community verification establishes trust, and gamification incentivizes participation.
+* **Open311 Integration:** Exposes an Open311 GeoReport v2 compliant API, ensuring instant integration with existing municipal CRM systems (such as Salesforce Service Cloud or municipal work order databases).
 
 ## 2. Target Audience & Personas
-* **Citizen Report (The Active Resident):** Wants to report issues quickly on mobile, track their status transparently, and see real community impact.
+* **Citizen Reporter (The Active Resident):** Wants to report issues quickly on mobile (even offline), track status transparently, and see real community impact.
 * **Citizen Validator (The Checker):** Validates reports submitted by others in their neighborhood to ensure accuracy and prevent spam.
 * **City Administrator / Operator:** Needs a unified, auto-prioritized dashboard to manage, assign, and mark issues as resolved.
 
 ## 3. Product Scope & Functional Requirements
 
-### 3.1. Issue Reporting (Multimodal Intake)
+### 3.1. Issue Reporting & Offline-First Intake
+* **Offline Drafting:** Stores image blobs in IndexedDB and forms in LocalStorage when cell coverage is unavailable. Auto-syncs when online status is restored.
 * **Image/Video Upload:** Users upload photos or short video clips showing the issue.
-* **EXIF Metadata Parsing:** Automatically extract geo-coordinates and timestamps if available, allowing users to override/adjust via an interactive map interface.
-* **Description Input:** Short optional text for additional context.
+* **EXIF Metadata Parsing:** Extract location and time data from files automatically.
+* **Image Deduplication (Perception Hashing):** Backend runs a perception hash (pHash) on the photo to detect identical duplicate uploads, prompting the user to "upvote" the existing issue instead of creating a duplicate.
 
 ### 3.2. Autonomous Multi-Agent Processing Pipeline
-To maximize **Agentic Depth (20% weight)**, a 6-agent system processes each issue in a structured, sequential workflow:
+To maximize **Agentic Depth (20% weight)**, a 6-agent system processes each issue:
 1. **Triage Agent:** Screens uploads for appropriateness, safety, and validity. Rejects duplicate or junk submissions.
 2. **Categorization Agent:** Uses Gemini Multimodal Vision to inspect the image/video, identify the type of issue (pothole, streetlight, etc.), and determine severity.
 3. **Geospatial & Routing Agent:** Matches coordinates to specific municipal zones or departments using Google Maps Geocoding & Places APIs.
 4. **Trust & Verification Agent:** Calculates initial credibility score based on user history, upload EXIF metadata consistency, and duplicates.
 5. **Predictive Analytics Agent:** Compares incoming report with historical data to flag recurring issues, forecast hotspots, or suggest systemic failures (e.g., water main breaks).
-6. **Resolution & Dispatch Agent:** Drafts actionable task summaries and dispatches notification pay-loads to relevant services.
+6. **Resolution & Dispatch Agent:** Drafts actionable task summaries and dispatches notification payloads to relevant services.
 
 ### 3.3. Community Verification (Consensus Mechanism)
 * **Crowdsourced Validation:** Nearby users view reports on their map and vote "Confirm" or "Spam".
