@@ -15,8 +15,8 @@
 * **Surface Gray (#16181C):** Container panels, sidebar backgrounds, and active card zones.
 * **Text High-Contrast (#F4F4F5):** H1, H2, primary button labels, and critical values.
 * **Text Muted (#A1A1AA):** Descriptions, coordinates, secondary labels, and metadata.
-* **Civic Emerald (#0D9488):** Single brand accent color. Used for active state highlights, verified pins, primary button backgrounds, and progress meters.
-* **Civic Emerald Active (#0F766E):** Focus states and hovers.
+* **Civic Emerald (#14B8A6):** Single brand accent color. Used for active state highlights, verified pins, primary button backgrounds, and progress meters. Calibrated for WCAG AA accessibility contrast.
+* **Civic Emerald Active (#0D9488):** Focus states and hovers.
 * **Whisper Line (rgba(255, 255, 255, 0.06)):** 1px structural dividing lines, table borders, and container edges.
 * **Banned:** Neon shadows, gradients, and the "AI Purple/Blue Neon" aesthetic.
 

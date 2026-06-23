@@ -52,7 +52,7 @@ This section outlines how each criterion of the **Evaluation Matrix** is verifie
 * **Goal:** Validate the consensus mechanism and the gamification engine.
 * **Checks:**
   - **Weighted Voting:** Submit votes from two users with trust scores of `80` and `40`. Verify the consensus score increments by `1.2` total (weighted `0.8` and `0.4` respectively).
-  - **Transition to Verified:** Vote "Confirm" with three separate users. Verify status changes from `Pending` to `Community Verified`.
+  - **Transition to Verified:** Vote "Confirm" with three separate users (each with standard Trust Score = 100, consensus threshold of 1.5). Verify status changes from `Pending` to `Community Verified`.
   - **Leaderboard Points:** Verify that submitting a confirmed report adds `10` points to the user's document in Firestore and updates their ranking.
 
 ### 2.4. Google Technologies Utilized (15% Weight)

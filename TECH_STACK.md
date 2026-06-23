@@ -37,6 +37,9 @@ GEMINI_API_KEY=AIzaSy...
 
 # Firebase Service Account Credentials (encoded as single-line JSON)
 FIREBASE_SERVICE_ACCOUNT='{"type":"service_account","project_id":"community-hero-...",...}'
+
+# Google Maps API Key (Server-side usage for Geocoding & Places API, IP restricted)
+GOOGLE_MAPS_SERVER_KEY=AIzaSy...
 ```
 
 ### Frontend Environment Variables (`/client/.env`)
@@ -46,7 +49,7 @@ Create a `.env` file in the `/client` directory:
 # Backend Base API Endpoint URL
 VITE_API_URL=http://localhost:5000/api
 
-# Google Maps API Key (Client-side usage for Geocoding & Autocomplete)
+# Google Maps API Key (Client-side usage for Maps JS SDK display, HTTP referrer restricted)
 VITE_GOOGLE_MAPS_API_KEY=AIzaSy...
 ```
 

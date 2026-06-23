@@ -1,23 +1,27 @@
 {
-  "loop_id": "feature-enrichment",
+  "loop_id": "council-fixes",
   "status": "success",
-  "last_run": "2026-06-23T17:40:30Z",
-  "current_goal": "Integrate Open311 standards and advanced features into specification documents",
+  "last_run": "2026-06-23T17:42:51Z",
+  "current_goal": "Resolve all loopholes identified by the LLM Council and pre-mortem audit",
   "active_checklist": [
     {
-      "task": "Update PRD.md with Open311 v2 compliance, image hashing, and offline-first drafting",
+      "task": "Apply accessibility contrast fixes in DESIGN.md",
       "status": "completed"
     },
     {
-      "task": "Update FEATURES.md with Open311 endpoint details and duplicate-prevention algorithms",
+      "task": "Split Google Maps API keys in TECH_STACK.md",
       "status": "completed"
     },
     {
-      "task": "Update ARCHITECTURE.md with Open311 data structures and Firestore schemas",
+      "task": "Add Firestore Security Rules and API boundaries in ARCHITECTURE.md",
       "status": "completed"
     },
     {
-      "task": "Run loop step and verify cost limits",
+      "task": "Correct consensus verification math in VERIFICATION.md",
+      "status": "completed"
+    },
+    {
+      "task": "Run loop health and self-healing checks",
       "status": "completed"
     }
   ],

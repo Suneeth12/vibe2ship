@@ -145,3 +145,38 @@ stateDiagram-v2
   "lastUpdated": "2026-06-23T23:00:00Z"
 }
 ```
+
+---
+
+## 5. Security Boundaries & Firestore Rules
+
+To eliminate client-side write vulnerabilities (such as forge voting, user points inflation, and unauthorized status modifications), client-side write permissions in Firestore are completely disabled. 
+
+* **The Server Boundary Rule:** All database inserts, updates, and deletes are performed exclusively by the Node.js backend using the `firebase-admin` SDK. The client app uses the standard Firestore SDK for high-performance read-only queries (real-time map pins, dashboard streams).
+* **Production Firestore Security Rules:**
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All collections are globally readable but client-side writes are strictly blocked
+    match /{document=**} {
+      allow read: if true;
+      allow write: if false; // All writes must go through server-side Admin SDK
+    }
+  }
+}
+```
+* **Storage Rules (Firebase Storage):**
+```javascript
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /issues/{allPaths=**} {
+      // Images/videos are readable by anyone, only authenticated users can upload files < 20MB
+      allow read: if true;
+      allow write: if request.auth != null 
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|video/.*');
+    }
+  }
+}
+```
