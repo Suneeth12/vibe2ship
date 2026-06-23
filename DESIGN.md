@@ -2,6 +2,8 @@
 
 ## 1. Visual Theme & Atmosphere
 * **Aesthetic Tone:** Clinical warm civic workspace. Clean, highly structured layouts designed to look like a high-end municipal command center. Warm and human, avoiding cold clinical utility.
+* **Layout Mockup Reference:**
+  * Layout visualization is represented by the generated UI mockup: [community_hero_ui_1782236223013.png](file:///C:/Users/sunee/.gemini/antigravity/brain/cc056499-b7ff-4c74-ae7c-e53df6036aed/community_hero_ui_1782236223013.png)
 * **Dial Settings:**
   * **Visual Density:** 8/10 (Cockpit Mode). Packed, information-dense display utilizing thin dividers and whitespace hierarchy instead of thick boxes.
   * **Layout Variance:** 7/10 (Offset Asymmetric). Asymmetric column scales, split viewports, and uneven grid cards to break standard template patterns.
@@ -14,7 +16,7 @@
 * **Text High-Contrast (#F4F4F5):** H1, H2, primary button labels, and critical values.
 * **Text Muted (#A1A1AA):** Descriptions, coordinates, secondary labels, and metadata.
 * **Civic Emerald (#0D9488):** Single brand accent color. Used for active state highlights, verified pins, primary button backgrounds, and progress meters.
-* **Civic Emerald Active (#0F766E):** Focus states and button hovers.
+* **Civic Emerald Active (#0F766E):** Focus states and hovers.
 * **Whisper Line (rgba(255, 255, 255, 0.06)):** 1px structural dividing lines, table borders, and container edges.
 * **Banned:** Neon shadows, gradients, and the "AI Purple/Blue Neon" aesthetic.
 
@@ -43,9 +45,9 @@
   * Skeleton cards matching feed item dimensions utilizing background-position shimmer. No circular spinners.
 
 ## 5. Layout & Spatial Principles
-* **Split-Screen Map Interface:** Viewport locked to `100dvh`. Left 55% = interactive map; right 45% = scrollable issue feed & detail panel.
+* **Split-Screen Map Interface:** Viewport locked to `100dvh`. Left 55% = interactive map showing glowing teal markers; right 45% = scrollable issue feed & detail panel.
 * **Asymmetrical Bento Grid:** Layout uses a masonry-style CSS Grid of varying card sizes to display community metrics.
-* **Mobile Collapse:** Multi-column layouts aggressively collapse to a single column (`w-full`, `px-4`, `py-8`) on viewports `< 768px`.
+* **Mobile Collapse:** Multi-column layouts aggressively collapse to a single column (`grid-cols-1`, `w-full`, `px-4`, `py-8`) on viewports `< 768px`.
 * **Viewport Stability:** Never use `h-screen` for full-height sections; always use `min-h-[100dvh]` to prevent Safari layout jumping.
 * **Touch Targets:** All interactive elements must maintain a minimum tap target of `44px`.
 
