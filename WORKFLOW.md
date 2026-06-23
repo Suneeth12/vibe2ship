@@ -61,9 +61,12 @@ When the endpoint `POST /api/issues/create` is triggered:
 To ensure the platform is robust, secure, and ready to win the hackathon, we apply this verification plan:
 
 ### 3.1. Security Checkpoints (Mandatory)
-* [ ] **Auth Token Check:** Verify that endpoints `/api/issues/create` and `/api/verifications/vote` refuse requests with invalid or missing Firebase Auth ID tokens.
+* [ ] **Auth Token Check:** Verify that endpoints `/api/issues/create` and `/api/verifications/vote` refuse requests with invalid or missing Firebase Auth ID tokens (expect 401).
 * [ ] **Maps Key Restrictions:** Confirm Google Cloud Console credential settings restrict the Maps API key to HTTP Referrers matching only the local development origins and the Cloud Run production origin.
-* [ ] **Firestore Rules Test:** Attempt to write to `issues` from the frontend using a different reporter ID. The write should fail. Verify that updates to `issues` are restricted only to `votes`, `verificationCount`, and `status`.
+* [ ] **Firestore Rules Test:** Attempt to write directly to `issues` collection from the client Firestore SDK. The write MUST fail (all writes go through Admin SDK via Express). Verify that `imageHashes`, `audit_log`, and `predictions` collections are not readable from the client.
+* [ ] **Zod Validation Test:** Send malformed payloads to `/api/issues/create` (e.g., latitude=9999, description with 5000 chars, missing mediaUrl). Verify all rejected with 400.
+* [ ] **Rate Limit Test:** Send 11 rapid `POST /api/issues/create` requests from the same user within 1 hour. Verify the 11th is rejected with 429.
+* [ ] **CORS Test:** Make an API request from an unauthorized origin (e.g., `curl -H 'Origin: https://evil.com'`). Verify CORS headers reject it.
 
 ### 3.2. Multimodal AI Verification
 * [ ] **Triage Test (Positive):** Upload a clear photo of a pothole. Verify the Triage Agent passes the image and the Categorization Agent classifies it as "Pothole".
@@ -76,6 +79,8 @@ To ensure the platform is robust, secure, and ready to win the hackathon, we app
 * [ ] **Geofence Check:** Attempt to vote on an issue located 10 kilometers away from the user's current coordinates. Verify the backend blocks the vote.
 
 ### 3.4. Observability & Logging Checkpoints
-* [ ] **Logging Verification:** Ensure `logging.getLogger` initializes correctly and `logger.info` outputs structured logs for every issue creation.
-* [ ] **Audit Trail Check:** Verify `log_event` successfully writes audit logs to Firestore when status changes.
-* [ ] **Alerting Test:** Trigger a database exception manually and verify that the `sentry_sdk` captures the error and forwards it to Sentry dashboard.
+* [ ] **Logging Verification:** Ensure `pino` logger initializes correctly and outputs structured JSON logs for every issue creation on Cloud Run.
+* [ ] **Audit Trail Check:** Verify `logEvent()` successfully writes audit logs to Firestore `audit_log` collection when issue status changes.
+* [ ] **Alerting Test:** Trigger a server exception manually and verify that `@sentry/node` captures the error and forwards it to the Sentry dashboard.
+* [ ] **Console Stripping:** Verify production Vite build has `drop_console: true` in terser config — no `console.log` in client bundle.
+* [ ] **Source Maps Disabled:** Verify `build.sourcemap: false` in `vite.config.ts` — no `.map` files in production output.

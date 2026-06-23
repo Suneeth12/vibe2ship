@@ -12,12 +12,20 @@ This document specifies the exact versions, packages, and environment configurat
 * **Map Rendering:** Leaflet (v1.9.4) & React Leaflet (v4.2.1)
 * **Icons:** `@phosphor-icons/react` (v2.1.5)
 * **HTTP Client:** Axios (v1.7.2)
+* **XSS Prevention:** `dompurify` (v3.1.5)
+* **EXIF Handling:** `piexifjs` (v1.0.6)
+* **Firebase Client:** `firebase` (v10.12.2)
 
 ### Backend Stack (`/server`)
 * **Core Framework:** Express (v4.19.2) + Node.js (v20.x or higher)
 * **AI Orchestration:** `@google/genai` (v0.1.1) (Google Gen AI SDK for Gemini API)
 * **Firebase Admin:** `firebase-admin` (v12.1.1) (Firestore, Storage, and Auth management)
 * **Middlewares:** `cors` (v2.8.5), `dotenv` (v16.4.5), `helmet` (v7.1.0)
+* **Validation:** `zod` (v3.23.8) (Runtime schema validation on all API inputs)
+* **Rate Limiting:** `express-rate-limit` (v7.2.0) (Per-user and per-IP throttling)
+* **Image Processing:** `sharp` (v0.33.4) (EXIF stripping, image re-encoding, magic byte validation)
+* **Logging:** `pino` (v9.1.0) (Structured JSON logging for Cloud Run)
+* **Error Tracking:** `@sentry/node` (v8.9.2) (Production error monitoring)
 * **Development Tools:** `nodemon` (v3.1.2) for hot-reloads
 
 ---

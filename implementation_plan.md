@@ -98,44 +98,30 @@ GEMINI_API_KEY=your_auth_key_here
 | Aspect | Detail |
 |---|---|
 | **Risk** | Default dev rules = `allow read, write: if true` → anyone can delete all data or fill with garbage during judging |
-| **Fix** | Deploy production security rules before final submission |
+| **Fix** | Deploy Admin-SDK-only production rules. ALL writes go through Express backend. Client = read-only. See `ARCHITECTURE.md` Section 5 for authoritative rules |
 
-**Production-ready Firestore rules:**
+**Production Firestore rules (Admin-SDK-only — AUTHORITATIVE):**
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Issues: anyone can read, authenticated can create, only reporter can edit
-    match /issues/{issueId} {
-      allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.reporterId == request.auth.uid;
-      allow update: if request.auth != null && (
-        request.auth.uid == resource.data.reporterId ||
-        request.resource.data.diff(resource.data)
-          .affectedKeys().hasOnly(['votes', 'verificationCount', 'status'])
-      );
-      allow delete: if false; // No deletion
-    }
-    
-    // Users: public read, self-write only
-    match /users/{userId} {
-      allow read: if true;
-      allow create, update: if request.auth != null 
-        && request.auth.uid == userId;
-      allow delete: if false;
-    }
-    
-    // Votes: authenticated create, prevent duplicates via composite doc ID
-    match /votes/{voteId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if false;
-    }
+    // PUBLIC: readable, no client writes (Admin SDK handles all mutations)
+    match /issues/{issueId} { allow read: if true; allow write: if false; }
+    match /users/{userId} { allow read: if true; allow write: if false; }
+    match /verifications/{id} { allow read: if true; allow write: if false; }
+    match /leaderboard/{id} { allow read: if true; allow write: if false; }
+    // INTERNAL: no client access at all
+    match /imageHashes/{id} { allow read: if false; allow write: if false; }
+    match /audit_log/{id} { allow read: if false; allow write: if false; }
+    match /predictions/{id} { allow read: if false; allow write: if false; }
+    // Block all unlisted collections
+    match /{document=**} { allow read: if false; allow write: if false; }
   }
 }
 ```
+
+> [!IMPORTANT]
+> Since Admin SDK bypasses ALL Firestore rules, **server-side Zod validation is mandatory** on every Express route. All authorization (ownership, role, geofence) must be enforced in middleware. See `BACKEND.md` Section 3.
 
 ### Issue #3: Google Maps API Key Restriction (HIGH)
 
@@ -203,7 +189,7 @@ service cloud.firestore {
 
 | # | Failure Mode | Likelihood | Impact | Prevention |
 |---|---|---|---|---|
-| **P1-1** | **Firebase rules wide open** | HIGH | HIGH | Deploy production rules on Day 6. Template provided in Security section above |
+| **P1-1** | **Firebase rules wide open** | HIGH | HIGH | Deploy Admin-SDK-only rules (ARCHITECTURE.md §5) on Day 6. Block ALL client writes. Per-collection read scoping. Internal collections hidden. |
 | **P1-2** | **Gemini rate limit hit during judging** | MEDIUM | HIGH | Combine 6 logical agents into 2-3 actual API calls (see Agent Optimization below). Cache results. Show graceful error with retry |
 | **P1-3** | **Cloud Run cold start = judge thinks app is dead** | MEDIUM | HIGH | Set `min-instances=1`. Add visually engaging loading animation (not just a spinner) |
 | **P1-4** | **Google Maps does not load** | LOW | HIGH | Enable Maps JS API in Cloud Console on Day 1. Test API key restrictions from incognito. Do not over-restrict referrers |
@@ -337,18 +323,23 @@ Return JSON with these fields:
   - department: string
   - status: "reported" | "verified" | "in_progress" | "resolved"
   - verificationCount: number
+  - consensusScore: number
   - createdAt, updatedAt: timestamp
 
 /users/{userId}
   - displayName, email, photoUrl
+  - role: "reporter" | "validator" | "admin"  // Firebase custom claim
   - points: number
   - badges: string[]
   - tier: "citizen" | "watchdog" | "champion" | "hero"
+  - trustScore: number (0-100, default 50)
   - reportsCount, verificationsCount
 
-/votes/{issueId_userId}  // composite ID prevents duplicate votes
-  - issueId, userId, type: "verify" | "not_found"
-  - createdAt: timestamp
+/verifications/{issueId_userId}  // composite ID prevents duplicate votes
+  - issueId, userId
+  - vote: "Confirm" | "Spam"
+  - voterTrustScore: number
+  - votedAt: timestamp
 ```
 
 ---

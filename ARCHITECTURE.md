@@ -74,6 +74,7 @@ stateDiagram-v2
   "email": "user@example.com",
   "displayName": "Jane Vance",
   "avatarUrl": "https://picsum.photos/seed/user1/100",
+  "role": "reporter",
   "points": 145,
   "level": 2,
   "trustScore": 75,
@@ -152,16 +153,47 @@ stateDiagram-v2
 
 To eliminate client-side write vulnerabilities (such as forge voting, user points inflation, and unauthorized status modifications), client-side write permissions in Firestore are completely disabled. 
 
-* **The Server Boundary Rule:** All database inserts, updates, and deletes are performed exclusively by the Node.js backend using the `firebase-admin` SDK. The client app uses the standard Firestore SDK for high-performance read-only queries (real-time map pins, dashboard streams).
-* **Production Firestore Security Rules:**
+* **The Server Boundary Rule (AUTHORITATIVE):** All database inserts, updates, and deletes are performed exclusively by the Node.js backend using the `firebase-admin` SDK. The client app uses the standard Firestore SDK for high-performance read-only queries (real-time map pins, dashboard streams). Since Admin SDK bypasses all Firestore rules, **all authorization and input validation MUST be enforced in Express middleware using Zod schemas.**
+* **User Roles:** `reporter` (default), `validator`, `admin`. Roles stored as Firebase custom claims (set via Admin SDK only). Server middleware checks `req.user.role` for protected endpoints.
+* **Production Firestore Security Rules (Per-Collection):**
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // All collections are globally readable but client-side writes are strictly blocked
-    match /{document=**} {
+    // PUBLIC collections: readable by anyone, writes blocked
+    match /issues/{issueId} {
       allow read: if true;
-      allow write: if false; // All writes must go through server-side Admin SDK
+      allow write: if false;
+    }
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /verifications/{verificationId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /leaderboard/{userId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    // INTERNAL collections: server-only, no client access
+    match /imageHashes/{hashId} {
+      allow read: if false;
+      allow write: if false;
+    }
+    match /audit_log/{logId} {
+      allow read: if false;
+      allow write: if false;
+    }
+    match /predictions/{predId} {
+      allow read: if false;
+      allow write: if false;
+    }
+    // Block all unlisted collections by default
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
     }
   }
 }
@@ -170,16 +202,33 @@ service cloud.firestore {
 ```javascript
 service firebase.storage {
   match /b/{bucket}/o {
-    match /issues/{allPaths=**} {
-      // Images/videos are readable by anyone, only authenticated users can upload files < 20MB
+    // Images: scoped per user, explicit MIME whitelist (SVG blocked)
+    match /issues/{userId}/images/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null 
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/jpeg|image/png|image/webp');
+    }
+    // Videos: scoped per user, separate size limit
+    match /issues/{userId}/videos/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
         && request.resource.size < 20 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*|video/.*');
+        && request.resource.contentType.matches('video/mp4|video/webm');
     }
   }
 }
 ```
+* **Server-Side Validation (Mandatory — Admin SDK bypasses rules):**
+  - All Express routes use Zod schemas before ANY Firestore write
+  - `reporterId` derived from auth token UID, never from request body
+  - All enum fields (category, severity, status, vote) validated against allowlists
+  - All coordinate fields validated: lat [-90, 90], lng [-180, 180]
+  - Text fields sanitized and length-capped: description max 1000 chars
+  - Firestore transactions used for all counter updates (votesCount, consensusScore, points)
+  - Geofence check (500m) enforced server-side before accepting votes
 
 ---
 
@@ -187,18 +236,43 @@ service firebase.storage {
 
 To maintain high availability and diagnose runtime failures in production, the application utilizes a structured monitoring framework.
 
-```javascript
-// Server-side logging configuration
-import logging from 'logging';
-const logger = logging.getLogger('community-hero');
+```typescript
+// Server-side structured logging (pino for JSON output on Cloud Run)
+import pino from 'pino';
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
-// Send error exceptions to Sentry for real-time alerting
-import sentry_sdk from 'sentry_sdk';
-sentry_sdk.init({ dsn: "https://example@sentry.io/0" });
+// Error tracking via Sentry Node SDK
+import * as Sentry from '@sentry/node';
+Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV });
 
-// Audit logs are stored in a database collection for traceability
-function log_event(action, target, result) {
-  logger.info(`Audit log: ${action} on ${target} resulted in ${result}`);
-  db.collection('audit_log').add({ action, target, result, timestamp: new Date() });
+// Audit log writes to Firestore (admin SDK, bypasses rules)
+async function logEvent(action: string, target: string, result: string, userId?: string) {
+  logger.info({ action, target, result, userId }, 'Audit event');
+  await db.collection('audit_log').add({
+    action, target, result, userId,
+    timestamp: admin.firestore.FieldValue.serverTimestamp()
+  });
 }
 ```
+
+---
+
+## 7. Firebase Console Configuration (Pre-Deployment Checklist)
+
+* **Disable anonymous authentication** in Firebase Console → Authentication → Sign-in providers
+* **Enable email enumeration protection** in Firebase Console → Authentication → Settings
+* **Configure Firebase App Check** with reCAPTCHA v3 to prevent API abuse
+* **Restrict Google Maps API keys:**
+  - Client key: HTTP referrer restriction (production domain + localhost)
+  - Server key: IP restriction (Cloud Run egress IP)
+  - Both: API restriction (Maps JS, Geocoding, Places only)
+* **Set Cloud Storage CORS:**
+```json
+[{
+  "origin": ["https://your-cloud-run-url.run.app", "http://localhost:5173"],
+  "method": ["GET", "PUT", "POST"],
+  "maxAgeSeconds": 3600,
+  "responseHeader": ["Content-Type", "Authorization"]
+}]
+```
+* **Production deployment:** Use Application Default Credentials (ADC) on Cloud Run instead of service account JSON key

@@ -58,11 +58,30 @@ This section outlines how each criterion of the **Evaluation Matrix** is verifie
 ### 2.4. Google Technologies Utilized (15% Weight)
 * **Goal:** Audit usage of Gemini, Google Maps, and Firebase.
 * **Checks:**
-  - **Gemini Key Isolation:** Verify that the backend server `.env` file holds the `GEMINI_API_KEY`, and no client-side source code references it.
-  - **Maps Key Restrictions:** Open the browser DevTools console, simulate requests from a non-approved domain, and verify the Google Maps API rejects the requests.
-  - **Firebase Security Rules:** Run the Firestore security rules unit tests using the Firebase emulator suite to verify users cannot write to other users' profiles or edit unauthorized keys in the `issues` collection.
+  - **Gemini Key Isolation:** Verify that the backend server `.env` file holds the `GEMINI_API_KEY`, and no client-side source code references it. Check DevTools Network tab for any `AIza` pattern.
+  - **Maps Key Restrictions:** Open the browser DevTools console, simulate requests from a non-approved domain, and verify the Google Maps API rejects the requests. Verify daily quota caps are set (1000 map loads, 500 geocode calls).
+  - **Firebase Security Rules:** Run these checks against deployed Firestore:
+    - Client SDK write to `issues` collection → MUST fail
+    - Client SDK read from `imageHashes` collection → MUST fail
+    - Client SDK read from `audit_log` collection → MUST fail
+    - Client SDK read from `issues` collection → MUST succeed
+  - **Storage Rules:** Attempt to upload SVG file → MUST fail. Attempt to upload to another user's path → MUST fail.
+  - **Firebase Auth Config:** Verify anonymous auth is disabled. Verify email enumeration protection is enabled.
 
-### 2.5. Product Experience & Design (10% Weight)
+### 2.5. Security Hardening (Deep Audit Verification)
+* **Goal:** Verify all 31 findings from the deep security audit are implemented.
+* **Checks:**
+  - **Zod Validation:** Send `POST /api/issues/create` with `{ latitude: 9999 }` → expect 400. Send with `description` of 5000 chars → expect 400.
+  - **Rate Limiting:** Send 11 `POST /api/issues/create` in 1 hour from same user → 11th returns 429.
+  - **CORS:** `curl -H 'Origin: https://evil.com' POST /api/issues/create` → no `Access-Control-Allow-Origin` header in response.
+  - **EXIF Stripping:** Upload JPEG with GPS EXIF data → download stored image from Storage → verify no EXIF GPS metadata remains.
+  - **XSS Prevention:** Set Firebase displayName to `<img src=x onerror=alert(1)>` → verify rendered as plain text in leaderboard.
+  - **CSP Headers:** Check response headers for `Content-Security-Policy` containing `default-src 'self'`.
+  - **Console Stripping:** View production bundle source → no `console.log` calls present.
+  - **Source Maps:** Check production build output → no `.map` files generated.
+  - **Error Handling:** Trigger 500 error → response body contains `{ "error": "Internal server error" }`, no stack trace.
+
+### 2.6. Product Experience & Design (10% Weight)
 * **Goal:** Audit visual premium looks, mobile responsiveness, and performance.
 * **Checks:**
   - **Lighthouse Performance Audit:** Run a Google Lighthouse audit on the client dashboard. Ensure:
@@ -71,7 +90,7 @@ This section outlines how each criterion of the **Evaluation Matrix** is verifie
     - Best Practices Score ≥ 90%
   - **Mobile Layout Audit:** Inspect the layout on a mobile screen size (375px width). Verify that the split map and feed layout collapses into a single vertical scroll stream with no horizontal overflow.
 
-### 2.6. Technical Implementation & Completeness (15% Weight)
+### 2.7. Technical Implementation & Completeness (15% Weight)
 * **Goal:** Verify the application is fully functional, complete, and deployed on Cloud Run.
 * **Checks:**
   - **Build Integrity:** Verify `npm run build` succeeds on both the client and server without warnings.

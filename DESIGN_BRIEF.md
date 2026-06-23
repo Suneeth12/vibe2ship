@@ -24,8 +24,8 @@ This document contains the structured I-Lang design brief mapping for the Commun
   * Text secondary: `#A1A1AA`
   * Borders: `rgba(255, 255, 255, 0.06)` (Whisper Line)
 * **accent = emerald:**
-  * Accent: `#0D9488` (Civic Emerald)
-  * Accent Active: `#0F766E`
+  * Accent: `#14B8A6` (Civic Emerald)
+  * Accent Active: `#0D9488` (Civic Emerald Active)
 * **typography = satoshi:**
   * Body & UI: Satoshi, 400, 1rem/1.5
 * **display = cabinet_grotesk:**
