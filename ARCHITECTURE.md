@@ -180,3 +180,25 @@ service firebase.storage {
   }
 }
 ```
+
+---
+
+## 6. Observability & Monitoring
+
+To maintain high availability and diagnose runtime failures in production, the application utilizes a structured monitoring framework.
+
+```javascript
+// Server-side logging configuration
+import logging from 'logging';
+const logger = logging.getLogger('community-hero');
+
+// Send error exceptions to Sentry for real-time alerting
+import sentry_sdk from 'sentry_sdk';
+sentry_sdk.init({ dsn: "https://example@sentry.io/0" });
+
+// Audit logs are stored in a database collection for traceability
+function log_event(action, target, result) {
+  logger.info(`Audit log: ${action} on ${target} resulted in ${result}`);
+  db.collection('audit_log').add({ action, target, result, timestamp: new Date() });
+}
+```

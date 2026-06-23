@@ -74,3 +74,8 @@ To ensure the platform is robust, secure, and ready to win the hackathon, we app
 * [ ] **Consensus Transition:** Create an issue with initial status `Pending`. Have three different test users vote "Confirm" on it. Verify the status updates automatically to `Community Verified` in Firestore.
 * [ ] **Sybil Prevention:** Attempt to vote twice from the same user ID on a single issue. The database must reject the duplicate vote document write.
 * [ ] **Geofence Check:** Attempt to vote on an issue located 10 kilometers away from the user's current coordinates. Verify the backend blocks the vote.
+
+### 3.4. Observability & Logging Checkpoints
+* [ ] **Logging Verification:** Ensure `logging.getLogger` initializes correctly and `logger.info` outputs structured logs for every issue creation.
+* [ ] **Audit Trail Check:** Verify `log_event` successfully writes audit logs to Firestore when status changes.
+* [ ] **Alerting Test:** Trigger a database exception manually and verify that the `sentry_sdk` captures the error and forwards it to Sentry dashboard.

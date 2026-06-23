@@ -206,7 +206,7 @@ service cloud.firestore {
 | **P1-1** | **Firebase rules wide open** | HIGH | HIGH | Deploy production rules on Day 6. Template provided in Security section above |
 | **P1-2** | **Gemini rate limit hit during judging** | MEDIUM | HIGH | Combine 6 logical agents into 2-3 actual API calls (see Agent Optimization below). Cache results. Show graceful error with retry |
 | **P1-3** | **Cloud Run cold start = judge thinks app is dead** | MEDIUM | HIGH | Set `min-instances=1`. Add visually engaging loading animation (not just a spinner) |
-| **P1-4** | **Google Maps doesn't load** | LOW | HIGH | Enable Maps JS API in Cloud Console on Day 1. Test API key restrictions from incognito. Don't over-restrict referrers |
+| **P1-4** | **Google Maps does not load** | LOW | HIGH | Enable Maps JS API in Cloud Console on Day 1. Test API key restrictions from incognito. Do not over-restrict referrers |
 
 ### Priority 2 (Demo-Weakening)
 

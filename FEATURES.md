@@ -71,10 +71,10 @@ Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Ag
 ### Agent Prompt Contracts & Jobs:
 1. **Triage Agent:**
    - *Job:* Filter out spam, inappropriate content, dark screens, or images/videos with no visible municipal infrastructure.
-   - *Prompt:* "Analyze the input media. Is this a valid public infrastructure or environmental issue? Answer true or false. If false, categorize the reason (spam, unsafe, private property, blank/poor quality)."
+   - *Prompt:* Analyze the input media. Is this a valid public infrastructure or environmental issue? Answer true or false. If false, categorize the reason (spam, unsafe, private property, blank/poor quality).
 2. **Categorization Agent:**
    - *Job:* Categorize the issue, estimate repair complexity, and gauge community safety risk.
-   - *Prompt:* "Identify the category of infrastructure failure. Estimate severity from LOW (aesthetic damage) to CRITICAL (immediate public safety threat, e.g., exposed high-voltage wiring, flooding)."
+   - *Prompt:* Identify the category of infrastructure failure. Estimate severity from LOW (aesthetic damage) to CRITICAL (immediate public safety threat, e.g., exposed high-voltage wiring, flooding).
 3. **Geospatial & Routing Agent:**
    - *Job:* Map coordinates to local municipal departments.
    - *Prompt:* Input: Coordinates + Address from Geocoding API. Map to: Public Works (Potholes/Sidewalks), Water & Sanitation (Leaks/Waste), Transport & Energy (Streetlights).
@@ -88,7 +88,7 @@ Incoming Report → [Triage Agent] → [Categorization Agent] → [Geospatial Ag
    - *Logic:* Checks Firestore for existing active issues within a 50-meter radius. If matches are found, it labels the new report as a "Potential Duplicate" and links them, grouping votes. It flags high-frequency grids (hotspots) for preventative maintenance alerts.
 6. **Resolution & Dispatch Agent:**
    - *Job:* Draft formal work order payloads.
-   - *Prompt:* "Generate a formal markdown work order summary. Detail: Issue type, location, severity, and step-by-step resolution requirements."
+   - *Prompt:* Generate a formal markdown work order summary. Detail: Issue type, location, severity, and step-by-step resolution requirements.
 
 ---
 

@@ -5,23 +5,23 @@
   "current_goal": "Resolve all loopholes identified by the LLM Council and pre-mortem audit",
   "active_checklist": [
     {
-      "task": "Apply accessibility contrast fixes in DESIGN.md",
+      "task": "Fix contrast",
       "status": "completed"
     },
     {
-      "task": "Split Google Maps API keys in TECH_STACK.md",
+      "task": "Split Maps keys",
       "status": "completed"
     },
     {
-      "task": "Add Firestore Security Rules and API boundaries in ARCHITECTURE.md",
+      "task": "Add auth rules",
       "status": "completed"
     },
     {
-      "task": "Correct consensus verification math in VERIFICATION.md",
+      "task": "Correct math",
       "status": "completed"
     },
     {
-      "task": "Run loop health and self-healing checks",
+      "task": "Run health",
       "status": "completed"
     }
   ],
