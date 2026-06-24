@@ -36,6 +36,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper to set mock/demo user state
+  const setMockAuth = (uid: string, name: string, points = 50, level = 1, trustScore = 60) => {
+    setUser({ uid, email: `${uid}@communityhero.org` } as any);
+    setProfile({
+      id: uid,
+      email: `${uid}@communityhero.org`,
+      displayName: name,
+      avatarUrl: `https://picsum.photos/seed/${uid}/100`,
+      role: 'reporter',
+      points,
+      level,
+      trustScore,
+      joinedAt: new Date().toISOString()
+    });
+  };
+
   // Sync profile from backend
   const syncProfile = async (uid: string) => {
     try {
@@ -43,56 +59,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProfile(response.data);
     } catch (error) {
       console.warn('Error fetching user profile from server:', error);
-      // Fallback local profile if backend is not initialized/accessible
-      setProfile({
-        id: uid,
-        email: 'localhero@example.com',
-        displayName: 'Local Hero',
-        avatarUrl: `https://picsum.photos/seed/${uid}/100`,
-        role: 'reporter',
-        points: 120,
-        level: 2,
-        trustScore: 75,
-        joinedAt: new Date().toISOString()
-      });
+      setMockAuth(uid, 'Local Hero', 120, 2, 75);
     }
   };
 
   useEffect(() => {
-    // 1. Check if there was a mock session active
     if (localStorage.getItem('is_mock_session') === 'true') {
       const mockUid = localStorage.getItem('demo_user_uid') || 'demo_user_id';
-      setUser({ uid: mockUid, email: 'demo@communityhero.org' } as any);
-      setProfile({
-        id: mockUid,
-        email: 'demo@communityhero.org',
-        displayName: 'Demo Hero',
-        avatarUrl: 'https://picsum.photos/seed/demo/100',
-        role: 'reporter',
-        points: 50,
-        level: 1,
-        trustScore: 60,
-        joinedAt: new Date().toISOString()
-      });
+      setMockAuth(mockUid, 'Demo Hero');
       setLoading(false);
       return;
     }
 
-    // 2. If auth is mock or fails, we will check state
     if (!auth || typeof auth.onAuthStateChanged !== 'function') {
-      // Mock auth fallback
-      setUser({ uid: 'mock_uid_123', email: 'mock@example.com' } as any);
-      setProfile({
-        id: 'mock_uid_123',
-        email: 'mock@example.com',
-        displayName: 'Mock Citizen Hero',
-        avatarUrl: 'https://picsum.photos/seed/mock/100',
-        role: 'reporter',
-        points: 350,
-        level: 3,
-        trustScore: 85,
-        joinedAt: new Date().toISOString()
-      });
+      setMockAuth('mock_uid_123', 'Mock Citizen Hero', 350, 3, 85);
       setLoading(false);
       return;
     }
@@ -118,7 +98,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginDemo = async () => {
     setLoading(true);
     try {
-      // Login anonymously for fast hackathon demo
       if (auth && typeof signInAnonymously === 'function') {
         const cred = await signInAnonymously(auth);
         localStorage.removeItem('is_mock_session');
@@ -128,22 +107,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Demo authentication failed:', error);
-      // Fallback mock session
       const mockUid = 'demo_user_id';
       localStorage.setItem('is_mock_session', 'true');
       localStorage.setItem('demo_user_uid', mockUid);
-      setUser({ uid: mockUid, email: 'demo@communityhero.org' } as any);
-      setProfile({
-        id: mockUid,
-        email: 'demo@communityhero.org',
-        displayName: 'Demo Hero',
-        avatarUrl: 'https://picsum.photos/seed/demo/100',
-        role: 'reporter',
-        points: 50,
-        level: 1,
-        trustScore: 60,
-        joinedAt: new Date().toISOString()
-      });
+      setMockAuth(mockUid, 'Demo Hero');
     } finally {
       setLoading(false);
     }

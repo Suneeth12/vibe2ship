@@ -9,20 +9,19 @@ interface IssueCardProps {
 
 export const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick }) => {
   const formattedDate = new Date(issue.createdAt).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Community Verified': return 'var(--status-info)';
-      case 'Resolved': return 'var(--status-success)';
-      case 'Rejected': return 'var(--status-critical)';
-      default: return 'var(--status-warning)';
-    }
+    const colors: Record<string, string> = {
+      'Community Verified': 'var(--status-info)',
+      Resolved: 'var(--status-success)',
+      Rejected: 'var(--status-critical)'
+    };
+    return colors[status] || 'var(--status-warning)';
   };
+
+  const scorePercent = Math.min(100, Math.max(0, Math.round(((issue.consensusScore + 3) / 6) * 100)));
 
   return (
     <div 
@@ -108,13 +107,13 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: 'var(--space-2)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
           <span>Consensus Progress</span>
-          <span>{Math.min(100, Math.max(0, Math.round(((issue.consensusScore + 3) / 6) * 100)))}%</span>
+          <span>{scorePercent}%</span>
         </div>
         <div style={{ height: '4px', background: 'var(--surface-input)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             background: issue.consensusScore >= 3.0 ? 'var(--status-success)' : issue.consensusScore <= -3.0 ? 'var(--status-critical)' : 'var(--civic-emerald)',
-            width: `${Math.min(100, Math.max(0, ((issue.consensusScore + 3) / 6) * 100))}%`,
+            width: `${scorePercent}%`,
             transition: 'width 0.3s ease'
           }} />
         </div>

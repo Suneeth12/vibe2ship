@@ -21,13 +21,12 @@ export const IssueFeed: React.FC<IssueFeedProps> = ({
   setFilterStatus
 }) => {
   const [search, setSearch] = useState('');
-
-  const filteredIssues = issues.filter(issue => {
-    const matchesSearch = issue.category.toLowerCase().includes(search.toLowerCase()) ||
-      issue.description.toLowerCase().includes(search.toLowerCase()) ||
-      issue.address.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch;
-  });
+  const term = search.toLowerCase();
+  const filteredIssues = issues.filter(i => 
+    i.category.toLowerCase().includes(term) ||
+    i.description.toLowerCase().includes(term) ||
+    i.address.toLowerCase().includes(term)
+  );
 
   return (
     <div style={{

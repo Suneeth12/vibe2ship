@@ -27,7 +27,7 @@ export async function runPredictor(): Promise<PredictionResult> {
       .get();
 
     const issues: any[] = [];
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       const data = doc.data();
       issues.push({
         id: doc.id,
@@ -147,7 +147,7 @@ function generateMockPredictions(issues: any[]): PredictionResult {
   db.collection('predictions').doc('current_trends').set({
     ...result,
     updatedAt: new Date().toISOString(),
-  }).catch(err => logger.error({ err }, 'Failed to save mock predictions'));
+  }).catch((err: any) => logger.error({ err }, 'Failed to save mock predictions'));
 
   return result;
 }

@@ -1,5 +1,3 @@
-// services/exif.ts
-
 export interface CleanedImageResult {
   latitude?: number;
   longitude?: number;
@@ -8,55 +6,30 @@ export interface CleanedImageResult {
 }
 
 export async function extractAndStripExif(file: File): Promise<CleanedImageResult> {
-  // 1. Try to read GPS coords (fallback to geolocation if missing)
-  let latitude: number | undefined;
-  let longitude: number | undefined;
-  let timestamp: string | undefined;
-
   try {
-    // Canvas re-encoding strips ALL EXIF automatically
-    const cleanBlob = await reencodeImage(file, { maxWidth: 1200, quality: 0.85 });
-    return { latitude, longitude, timestamp, cleanBlob };
+    const cleanBlob = await reencodeImage(file);
+    return { cleanBlob };
   } catch (error) {
-    console.error('Error stripping EXIF metadata:', error);
-    return { cleanBlob: file }; // fallback to original file if re-encode fails
+    console.error('Error stripping EXIF:', error);
+    return { cleanBlob: file };
   }
 }
 
-async function reencodeImage(file: File, opts: { maxWidth: number; quality: number }): Promise<Blob> {
+function reencodeImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = URL.createObjectURL(file);
-    
     img.onload = () => {
       URL.revokeObjectURL(img.src);
-      const scale = Math.min(1, opts.maxWidth / Math.max(img.width, img.height));
       const canvas = document.createElement('canvas');
+      const scale = Math.min(1, 1200 / Math.max(img.width, img.height));
       canvas.width = img.width * scale;
       canvas.height = img.height * scale;
-      
       const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Failed to get 2d context'));
-        return;
-      }
-      
+      if (!ctx) return reject(new Error('No context'));
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Canvas toBlob returned null'));
-          }
-        },
-        'image/jpeg',
-        opts.quality
-      );
+      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Blob null')), 'image/jpeg', 0.85);
     };
-
-    img.onerror = (err) => {
-      reject(err);
-    };
+    img.onerror = reject;
   });
 }

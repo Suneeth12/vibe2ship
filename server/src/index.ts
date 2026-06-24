@@ -27,12 +27,26 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // 4. Rate limiting for general protection
 app.use(generalLimiter);
 
+import * as path from 'path';
+
 // 5. Connect Routes
 app.use(healthRouter); // GET /health is public at root
 app.use('/api/issues', issuesRouter);
 app.use('/api/verifications', verificationsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/open311', open311Router);
+
+// Serve frontend client static assets in production if built
+const clientBuildPath = path.resolve(__dirname, '../../client/dist');
+if (require('fs').existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 // 6. Global error handler
 app.use(errorHandler);

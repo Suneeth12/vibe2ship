@@ -121,20 +121,11 @@ export function useIssues(lat?: number, lng?: number, radius = 5000, status = 'a
 }
 
 // Distance helper in meters
-function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371e3;
-  const phi1 = (lat1 * Math.PI) / 180;
-  const phi2 = (lat2 * Math.PI) / 180;
-  const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
-  const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
-
-  const a =
-    Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-    Math.cos(phi1) *
-      Math.cos(phi2) *
-      Math.sin(deltaLambda / 2) *
-      Math.sin(deltaLambda / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+export function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const rad = (x: number) => (x * Math.PI) / 180;
+  const dLat = rad(lat2 - lat1), dLon = rad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 6371e3 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 export type { Issue as IssueType };
+
