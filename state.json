@@ -1,27 +1,23 @@
 {
-  "loop_id": "council-fixes",
+  "loop_id": "clean-audit-simplify",
   "status": "success",
-  "last_run": "2026-06-23T17:42:51Z",
-  "current_goal": "Resolve all loopholes identified by the LLM Council and pre-mortem audit",
+  "last_run": "2026-06-24T14:12:00Z",
+  "current_goal": "Audit code, simplify logic via Ponytail ladder, clean up warnings and ensure repo build integrity",
   "active_checklist": [
     {
-      "task": "Fix contrast",
+      "task": "Audit backend server code (security, middleware, routing)",
       "status": "completed"
     },
     {
-      "task": "Split Maps keys",
+      "task": "Audit frontend client code (assets, map views, components, and types)",
       "status": "completed"
     },
     {
-      "task": "Add auth rules",
+      "task": "Apply Ponytail ladder simplification pass",
       "status": "completed"
     },
     {
-      "task": "Correct math",
-      "status": "completed"
-    },
-    {
-      "task": "Run health",
+      "task": "Verify full repository builds cleanly",
       "status": "completed"
     }
   ],

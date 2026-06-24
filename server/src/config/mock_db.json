@@ -1,0 +1,157 @@
+{
+  "users": {
+    "demo_user_id": {
+      "email": "demo@communityhero.org",
+      "displayName": "Demo Hero",
+      "avatarUrl": "https://picsum.photos/seed/demo/100",
+      "role": "reporter",
+      "points": 50,
+      "level": 1,
+      "trustScore": 60,
+      "joinedAt": "2026-06-24T10:12:26.691Z"
+    },
+    "user_1": {
+      "email": "alex@communityhero.org",
+      "displayName": "Alex Smith",
+      "avatarUrl": "https://picsum.photos/seed/user1/100",
+      "role": "reporter",
+      "points": 320,
+      "level": 3,
+      "trustScore": 85,
+      "joinedAt": "2026-06-14T10:12:26.691Z"
+    },
+    "user_2": {
+      "email": "sara@communityhero.org",
+      "displayName": "Sara Connor",
+      "avatarUrl": "https://picsum.photos/seed/user2/100",
+      "role": "validator",
+      "points": 780,
+      "level": 5,
+      "trustScore": 92,
+      "joinedAt": "2026-06-03T14:12:26.691Z"
+    },
+    "user_3": {
+      "email": "officer_bob@seattle.gov",
+      "displayName": "Officer Bob",
+      "avatarUrl": "https://picsum.photos/seed/user3/100",
+      "role": "admin",
+      "points": 1500,
+      "level": 10,
+      "trustScore": 99,
+      "joinedAt": "2026-05-13T18:12:26.691Z"
+    }
+  },
+  "leaderboard": {
+    "demo_user_id": {
+      "displayName": "Demo Hero",
+      "points": 50,
+      "level": 1,
+      "lastUpdated": "2026-06-24T10:12:26.691Z"
+    },
+    "user_1": {
+      "displayName": "Alex Smith",
+      "points": 320,
+      "level": 3,
+      "lastUpdated": "2026-06-24T10:12:26.691Z"
+    },
+    "user_2": {
+      "displayName": "Sara Connor",
+      "points": 780,
+      "level": 5,
+      "lastUpdated": "2026-06-24T10:12:26.691Z"
+    },
+    "user_3": {
+      "displayName": "Officer Bob",
+      "points": 1500,
+      "level": 10,
+      "lastUpdated": "2026-06-24T10:12:26.691Z"
+    }
+  },
+  "issues": {
+    "issue_1": {
+      "reporterId": "user_1",
+      "mediaUrl": "https://picsum.photos/seed/pothole/400/300",
+      "mediaType": "image/jpeg",
+      "description": "Deep pothole causing cars to swerve on 4th Ave.",
+      "latitude": 47.608,
+      "longitude": -122.335,
+      "address": "4th Ave & Madison St, Seattle, WA 98104",
+      "category": "Infrastructure",
+      "subcategory": "Pothole",
+      "severity": "high",
+      "priorityScore": 72,
+      "department": "Seattle Department of Transportation",
+      "status": "Pending",
+      "consensusScore": 0,
+      "votesCount": 0,
+      "confidence": 0.92,
+      "reasoning": "Pothole verified on major street.",
+      "createdAt": "2026-06-24T08:12:26.691Z",
+      "updatedAt": "2026-06-24T08:12:26.691Z"
+    },
+    "issue_2": {
+      "reporterId": "user_2",
+      "mediaUrl": "https://picsum.photos/seed/light/400/300",
+      "mediaType": "image/jpeg",
+      "description": "Street light out near transit station, very dark at night.",
+      "latitude": 47.615,
+      "longitude": -122.321,
+      "address": "E John St & Broadway, Seattle, WA 98102",
+      "category": "Utilities",
+      "subcategory": "Street Light",
+      "severity": "medium",
+      "priorityScore": 55,
+      "department": "City Light",
+      "status": "Community Verified",
+      "consensusScore": 6,
+      "votesCount": 8,
+      "confidence": 0.88,
+      "reasoning": "Darkness near transit hub increases safety risk.",
+      "createdAt": "2026-06-23T10:12:26.691Z",
+      "updatedAt": "2026-06-23T22:12:26.691Z"
+    },
+    "issue_3": {
+      "reporterId": "user_3",
+      "mediaUrl": "https://picsum.photos/seed/graffiti/400/300",
+      "mediaType": "image/jpeg",
+      "description": "Graffiti covering park regulations sign.",
+      "latitude": 47.601,
+      "longitude": -122.33,
+      "address": "Pioneer Square Park, Seattle, WA 98104",
+      "category": "Sanitation",
+      "subcategory": "Graffiti",
+      "severity": "low",
+      "priorityScore": 20,
+      "department": "Parks & Recreation",
+      "status": "Resolved",
+      "consensusScore": 12,
+      "votesCount": 12,
+      "confidence": 0.95,
+      "reasoning": "Non-hazardous cleanup task.",
+      "createdAt": "2026-06-22T10:12:26.691Z",
+      "updatedAt": "2026-06-24T04:12:26.691Z"
+    },
+    "issue_4": {
+      "reporterId": "user_1",
+      "mediaUrl": "https://picsum.photos/seed/bikelane/400/300",
+      "mediaType": "image/jpeg",
+      "description": "Delivery truck constantly parking in the designated bike lane during morning rush hour.",
+      "latitude": 47.613,
+      "longitude": -122.345,
+      "address": "2nd Ave & Bell St, Seattle, WA 98121",
+      "category": "Infrastructure",
+      "subcategory": "Obstruction",
+      "severity": "medium",
+      "priorityScore": 48,
+      "department": "Seattle Department of Transportation",
+      "status": "Pending",
+      "consensusScore": 2,
+      "votesCount": 3,
+      "confidence": 0.85,
+      "reasoning": "Obstruction creates safety hazard for cyclists.",
+      "createdAt": "2026-06-24T05:12:26.691Z",
+      "updatedAt": "2026-06-24T05:12:26.691Z"
+    }
+  },
+  "verifications": {}
+}
