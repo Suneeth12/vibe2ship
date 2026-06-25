@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Issue, getDistance } from '../../hooks/useIssues';
 import { api } from '../../services/api';
+import { sanitize } from '../../services/sanitize';
 
 import { 
   X, ShieldCheck, MapPin, 
@@ -143,7 +144,7 @@ export const IssueDetail: React.FC<IssueDetailProps> = ({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
             <MapPin size={14} />
-            <span>{issue.address}</span>
+            <span>{sanitize(issue.address)}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
             <NavigationArrow size={14} />
@@ -155,7 +156,7 @@ export const IssueDetail: React.FC<IssueDetailProps> = ({
         <DoubleBezel>
           <h4 style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--civic-emerald)', marginBottom: '4px' }}>Reporter Notes</h4>
           <p style={{ fontSize: '13px', color: 'var(--text-high)', lineHeight: 1.4 }}>
-            {issue.description || 'No user notes provided.'}
+            {sanitize(issue.description) || 'No user notes provided.'}
           </p>
         </DoubleBezel>
 
@@ -197,7 +198,7 @@ export const IssueDetail: React.FC<IssueDetailProps> = ({
 
           {issue.reasoning && (
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', borderTop: '1px solid var(--whisper-line)', paddingTop: '8px', fontStyle: 'italic' }}>
-              <strong>AI Reasoning:</strong> {issue.reasoning}
+              <strong>AI Reasoning:</strong> {sanitize(issue.reasoning)}
             </p>
           )}
         </div>

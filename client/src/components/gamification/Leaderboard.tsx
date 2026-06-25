@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import { sanitize } from '../../services/sanitize';
 import { Trophy, Medal, Crown, User } from '@phosphor-icons/react';
 
 interface LeaderboardUser {
@@ -115,7 +116,7 @@ export const Leaderboard: React.FC = () => {
                         <User size={16} />
                       </div>
                       <span style={{ fontWeight: 500, fontSize: '14px', color: 'var(--text-high)' }}>
-                        {u.displayName}
+                        {sanitize(u.displayName)}
                       </span>
                     </div>
                   </td>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Issue } from '../../hooks/useIssues';
 import { ShieldCheck, Calendar } from '@phosphor-icons/react';
+import { sanitize } from '../../services/sanitize';
 
 interface IssueCardProps {
   issue: Issue;
@@ -87,7 +88,7 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick }) => {
             textOverflow: 'ellipsis',
             lineHeight: 1.4
           }}>
-            {issue.description || 'No description provided.'}
+            {sanitize(issue.description) || 'No description provided.'}
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
