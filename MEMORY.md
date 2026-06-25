@@ -41,16 +41,16 @@
 ## 5. File Index
 | File | Purpose |
 |------|---------|
-| PRD.md | Product requirements + functional scope |
-| FEATURES.md | Deep-dive technical specs for each feature |
-| ARCHITECTURE.md | System architecture + database schema + security rules (AUTHORITATIVE) |
-| BACKEND.md | Server folder structure + API contracts + middleware |
-| FRONTEND.md | Client folder structure + security implementations + design tokens |
-| DESIGN.md | Visual design system + component stylings |
-| DESIGN_BRIEF.md | I-Lang structured design brief |
-| TECH_STACK.md | Package versions + API key setup instructions |
-| WORKFLOW.md | User journeys + processing flow + verification checkpoints |
-| VERIFICATION.md | Hackathon evaluation criteria mapping + test plan |
-| THREAT_MODEL.md | STRIDE + PASTA threat analysis (27+ vectors) |
-| SECURITY_AUDIT.md | Consolidated audit report (31 findings, all resolved) |
-| implementation_plan.md | Master timeline + premortem + agent optimization |
+| [docs/PRD.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/PRD.md) | Product requirements + functional scope |
+| [docs/FEATURES.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/FEATURES.md) | Deep-dive technical specs for each feature |
+| [docs/ARCHITECTURE.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/ARCHITECTURE.md) | System architecture + database schema + security rules (AUTHORITATIVE) |
+| [docs/BACKEND.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/BACKEND.md) | Server folder structure + API contracts + middleware |
+| [docs/FRONTEND.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/FRONTEND.md) | Client folder structure + security implementations + design tokens |
+| [docs/DESIGN.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/DESIGN.md) | Visual design system + component stylings |
+| [docs/DESIGN_BRIEF.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/DESIGN_BRIEF.md) | I-Lang structured design brief |
+| [docs/TECH_STACK.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/TECH_STACK.md) | Package versions + API key setup instructions |
+| [docs/WORKFLOW.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/WORKFLOW.md) | User journeys + processing flow + verification checkpoints |
+| [docs/VERIFICATION.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/VERIFICATION.md) | Hackathon evaluation criteria mapping + test plan |
+| [docs/THREAT_MODEL.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/THREAT_MODEL.md) | STRIDE + PASTA threat analysis (27+ vectors) |
+| [docs/SECURITY_AUDIT.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/SECURITY_AUDIT.md) | Consolidated audit report (31 findings, all resolved) |
+| [docs/implementation_plan.md](file:///d:/PROJECTS/HACKATONS/Vibe2Ship/docs/implementation_plan.md) | Master timeline + premortem + agent optimization |
