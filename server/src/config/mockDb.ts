@@ -105,6 +105,12 @@ class MockCollectionReference extends MockQuery {
     const finalId = id || Math.random().toString(36).substring(2, 15);
     return new MockDocumentReference(this.collectionName, finalId, this.dbInstance);
   }
+
+  async add(data: any) {
+    const finalId = Math.random().toString(36).substring(2, 15);
+    this.dbInstance.setData(this.collectionName, finalId, data);
+    return new MockDocumentReference(this.collectionName, finalId, this.dbInstance);
+  }
 }
 
 class MockTransaction {

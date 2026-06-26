@@ -73,6 +73,9 @@ export async function routeAndVerify(
       const isMock = !env.GEMINI_API_KEY || env.GEMINI_API_KEY === 'PLACEHOLDER';
       
       if (isMock) {
+        if (env.NODE_ENV === 'production') {
+          throw new Error('Gemini API mock semantic comparator is disabled in production.');
+        }
         // Mock semantic comparison
         for (const nearby of nearbyIssues) {
           if (nearby.distance < 30) { // Very close by

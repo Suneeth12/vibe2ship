@@ -25,6 +25,9 @@ export async function analyzeIssue(
   const isMock = !env.GEMINI_API_KEY || env.GEMINI_API_KEY === 'PLACEHOLDER';
   
   if (isMock) {
+    if (env.NODE_ENV === 'production') {
+      throw new Error('Gemini API mock analyzer fallback is disabled in production.');
+    }
     logger.warn('Gemini API key is missing/placeholder. Falling back to mock analyzer.');
     return mockAnalysis(userDescription, mediaType);
   }
@@ -60,6 +63,9 @@ export async function analyzeIssue(
     return parsed;
   } catch (error) {
     logger.error({ error }, 'Failed to run Mega-Analyzer agent');
+    if (env.NODE_ENV === 'production') {
+      throw error;
+    }
     // If Gemini fails, fall back to mock instead of crashing
     logger.warn('Falling back to mock analyzer due to Gemini API failure.');
     return mockAnalysis(userDescription, mediaType);

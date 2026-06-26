@@ -1,29 +1,51 @@
 import * as admin from 'firebase-admin';
 import { env } from './env';
 import { MockFirestore } from './mockDb';
+import fs from 'fs';
+import path from 'path';
+
+let credential: admin.credential.Credential;
+let projectId: string | undefined;
+
+const serviceAccountVal = env.FIREBASE_SERVICE_ACCOUNT.trim();
+
+if (serviceAccountVal === 'ADC') {
+  credential = admin.credential.applicationDefault();
+  projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
+} else if (serviceAccountVal.startsWith('{')) {
+  try {
+    const parsedCert = JSON.parse(serviceAccountVal);
+    credential = admin.credential.cert(parsedCert);
+    projectId = parsedCert.project_id;
+  } catch (err) {
+    throw new Error('Failed to parse FIREBASE_SERVICE_ACCOUNT as inline JSON.');
+  }
+} else {
+  try {
+    const resolvedPath = path.resolve(serviceAccountVal.replace(/^['"]|['"]$/g, ''));
+    const fileContent = fs.readFileSync(resolvedPath, 'utf8');
+    const parsedCert = JSON.parse(fileContent);
+    credential = admin.credential.cert(parsedCert);
+    projectId = parsedCert.project_id;
+  } catch (err) {
+    throw new Error(`Failed to read/parse FIREBASE_SERVICE_ACCOUNT file at path: ${serviceAccountVal}`);
+  }
+}
+
+let storageBucket: string;
+if (env.FIREBASE_STORAGE_BUCKET) {
+  storageBucket = env.FIREBASE_STORAGE_BUCKET;
+} else if (projectId) {
+  storageBucket = `${projectId}.appspot.com`;
+} else {
+  throw new Error('Cannot determine Firebase Storage Bucket: neither FIREBASE_STORAGE_BUCKET nor project ID is available.');
+}
 
 try {
-  let credentialJson;
-  try {
-    const fsLib = require('fs');
-    const pathLib = require('path');
-    
-    // Check if it's a file path
-    const resolvedPath = pathLib.resolve(env.FIREBASE_SERVICE_ACCOUNT.replace(/^['"]|['"]$/g, '')); // strip quotes
-    if (fsLib.existsSync(resolvedPath)) {
-      credentialJson = JSON.parse(fsLib.readFileSync(resolvedPath, 'utf8'));
-    } else {
-      credentialJson = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
-    }
-  } catch (err) {
-    throw new Error('FIREBASE_SERVICE_ACCOUNT must be a valid JSON string or a valid path to a service account JSON file.');
-  }
-
   admin.initializeApp({
-    credential: admin.credential.cert(credentialJson),
-    storageBucket: `${credentialJson.project_id}.appspot.com` // Auto-derive storage bucket
+    credential,
+    storageBucket,
   });
-
   console.log('✔ Firebase Admin SDK initialized successfully');
 } catch (error) {
   console.error('❌ Failed to initialize Firebase Admin SDK:', error);
@@ -40,6 +62,10 @@ class DynamicFirestore {
     try {
       this.realDb = admin.firestore();
     } catch (err) {
+      if (env.NODE_ENV === 'production') {
+        console.error('❌ Firestore initialization failed in production:', err);
+        throw err;
+      }
       console.warn('⚠️ Firestore initialization failed, using mock database.');
       this.isFallback = true;
       this.mockDb = new MockFirestore();
@@ -48,6 +74,9 @@ class DynamicFirestore {
 
   private getDb() {
     if (this.isFallback) {
+      if (env.NODE_ENV === 'production') {
+        throw new Error('Mock database fallback is disabled in production.');
+      }
       if (!this.mockDb) this.mockDb = new MockFirestore();
       return this.mockDb;
     }
@@ -55,6 +84,9 @@ class DynamicFirestore {
   }
 
   private switchToMock() {
+    if (env.NODE_ENV === 'production') {
+      throw new Error('Mock database fallback is disabled in production.');
+    }
     if (!this.isFallback) {
       console.warn('⚠️ Cloud Firestore API is disabled or inaccessible. Falling back to Local Mock Database.');
       this.isFallback = true;
@@ -96,12 +128,33 @@ class DynamicFirestore {
 
     return {
       doc(id?: string) {
+        const docId = id || (self.isFallback ? 
+          Math.random().toString(36).substring(2, 15) : 
+          self.realDb.collection(name).doc().id);
+
         return {
-          async get() { return self.executeWithFallback(db => db.collection(name).doc(id).get()); },
-          async set(data: any, options?: any) { return self.executeWithFallback(db => db.collection(name).doc(id).set(data, options)); },
-          async update(data: any) { return self.executeWithFallback(db => db.collection(name).doc(id).update(data)); },
-          async delete() { return self.executeWithFallback(db => db.collection(name).doc(id).delete()); }
+          id: docId,
+          async get() { return self.executeWithFallback(db => db.collection(name).doc(docId).get()); },
+          async set(data: any, options?: any) { return self.executeWithFallback(db => db.collection(name).doc(docId).set(data, options)); },
+          async update(data: any) { return self.executeWithFallback(db => db.collection(name).doc(docId).update(data)); },
+          async delete() { return self.executeWithFallback(db => db.collection(name).doc(docId).delete()); }
         };
+      },
+      async add(data: any) {
+        return self.executeWithFallback(async (db) => {
+          if (self.isFallback) {
+            return await db.collection(name).add(data);
+          } else {
+            const docRef = await db.collection(name).add(data);
+            return {
+              id: docRef.id,
+              async get() { return self.executeWithFallback(db => db.collection(name).doc(docRef.id).get()); },
+              async set(data: any, options?: any) { return self.executeWithFallback(db => db.collection(name).doc(docRef.id).set(data, options)); },
+              async update(data: any) { return self.executeWithFallback(db => db.collection(name).doc(docRef.id).update(data)); },
+              async delete() { return self.executeWithFallback(db => db.collection(name).doc(docRef.id).delete()); }
+            };
+          }
+        });
       },
       where(field: string, op: string, val: any) { return queryBuilder([['where', [field, op, val]]]); },
       orderBy(field: string, dir?: string) { return queryBuilder([['orderBy', [field, dir]]]); },
