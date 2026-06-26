@@ -8,27 +8,32 @@ let credential: admin.credential.Credential;
 let projectId: string | undefined;
 
 const serviceAccountVal = env.FIREBASE_SERVICE_ACCOUNT.trim();
+const cleanedVal = serviceAccountVal.replace(/^['"]|['"]$/g, '').trim();
 
-if (serviceAccountVal === 'ADC') {
+if (cleanedVal === 'ADC') {
   credential = admin.credential.applicationDefault();
   projectId = process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT;
-} else if (serviceAccountVal.startsWith('{')) {
-  try {
-    const parsedCert = JSON.parse(serviceAccountVal);
-    credential = admin.credential.cert(parsedCert);
-    projectId = parsedCert.project_id;
-  } catch (err) {
-    throw new Error('Failed to parse FIREBASE_SERVICE_ACCOUNT as inline JSON.');
-  }
 } else {
+  let parsedCert: any = null;
   try {
-    const resolvedPath = path.resolve(serviceAccountVal.replace(/^['"]|['"]$/g, ''));
-    const fileContent = fs.readFileSync(resolvedPath, 'utf8');
-    const parsedCert = JSON.parse(fileContent);
+    parsedCert = JSON.parse(cleanedVal);
+  } catch (jsonErr) {
+    try {
+      const resolvedPath = path.resolve(cleanedVal);
+      if (fs.existsSync(resolvedPath)) {
+        const fileContent = fs.readFileSync(resolvedPath, 'utf8');
+        parsedCert = JSON.parse(fileContent);
+      }
+    } catch (pathErr) {
+      // Fall through to error below
+    }
+  }
+
+  if (parsedCert) {
     credential = admin.credential.cert(parsedCert);
     projectId = parsedCert.project_id;
-  } catch (err) {
-    throw new Error(`Failed to read/parse FIREBASE_SERVICE_ACCOUNT file at path: ${serviceAccountVal}`);
+  } else {
+    throw new Error(`Failed to resolve FIREBASE_SERVICE_ACCOUNT. Must be 'ADC', valid inline JSON, or a valid file path. Value was: ${serviceAccountVal}`);
   }
 }
 

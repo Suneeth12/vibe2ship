@@ -15,11 +15,16 @@ if (!firebaseServiceAccount) {
 
 try {
   let credentialJson;
-  const resolvedPath = path.resolve(firebaseServiceAccount.replace(/^['"]|['"]$/g, ''));
-  if (fs.existsSync(resolvedPath)) {
-    credentialJson = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
-  } else {
-    credentialJson = JSON.parse(firebaseServiceAccount);
+  const cleanedVal = firebaseServiceAccount.trim().replace(/^['"]|['"]$/g, '').trim();
+  try {
+    credentialJson = JSON.parse(cleanedVal);
+  } catch (jsonErr) {
+    const resolvedPath = path.resolve(cleanedVal);
+    if (fs.existsSync(resolvedPath)) {
+      credentialJson = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
+    } else {
+      throw new Error(`Failed to resolve FIREBASE_SERVICE_ACCOUNT in seed.ts. Value: ${firebaseServiceAccount}`);
+    }
   }
 
   admin.initializeApp({
