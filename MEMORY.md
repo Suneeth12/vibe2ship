@@ -33,9 +33,13 @@
 - [x] Frontend specification completed (FRONTEND.md) — component tree, security implementations, design tokens
 - [x] All contradictions between implementation_plan.md and ARCHITECTURE.md resolved
 - [x] Missing dependencies added to TECH_STACK.md (zod, express-rate-limit, sharp, pino, dompurify, piexifjs)
-- [ ] Initialize client React scaffolding (Next Step)
-- [ ] Initialize server Express scaffolding (Next Step)
-- [ ] Implement core features (Phase 2-3)
+- [x] Client React scaffolding + Server Express scaffolding (DONE)
+- [x] Root monorepo setup with concurrent build scripts (DONE - commit 4437dc6)
+- [x] Firebase Admin SDK + mock DB fallback (DONE - commit a63734c)
+- [x] Geolocation + Leaflet map + draggable pin + IP fallback (DONE - commit bf8cac6)
+- [x] Heatmap hotspot clusters + server routes (DONE - commit ea17329)
+- [/] Core feature testing (voting, leaderboard, Gemini pipeline) — IN PROGRESS, paused by quota
+- [ ] E2E Testing + Adversarial Hardening + Final Audit (M5)
 - [ ] Deploy to Cloud Run (Phase 4)
 
 ## 5. File Index

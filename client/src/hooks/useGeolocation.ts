@@ -6,6 +6,7 @@ export interface GeolocationState {
   accuracy: number | null;
   error: string | null;
   loading: boolean;
+  isFallback: boolean;
 }
 
 // Default to Seattle city center (matching ARCHITECTURE.md examples)
@@ -21,6 +22,7 @@ export function useGeolocation() {
     accuracy: null,
     error: null,
     loading: true,
+    isFallback: false,
   });
 
   const getPosition = () => {
@@ -33,7 +35,10 @@ export function useGeolocation() {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    let ipFallbackAttempted = false;
+
+    // Use watchPosition to continuously update coordinates when they change or become available
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         setState({
           latitude: position.coords.latitude,
@@ -41,20 +46,33 @@ export function useGeolocation() {
           accuracy: position.coords.accuracy,
           error: null,
           loading: false,
+          isFallback: false, // Successfully got real browser geolocation
         });
       },
       (error) => {
-        console.warn('Geolocation access failed. Trying IP-based geolocation fallback...', error.message);
+        console.warn('Geolocation access failed or timed out. Trying IP-based geolocation fallback...', error.message);
+        
+        // If we already attempted IP fallback, don't spam the API on subsequent errors
+        if (ipFallbackAttempted) return;
+        ipFallbackAttempted = true;
+
         fetch('https://ipapi.co/json/')
           .then(res => res.json())
           .then(data => {
             if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
-              setState({
-                latitude: data.latitude,
-                longitude: data.longitude,
-                accuracy: 10000,
-                error: null,
-                loading: false,
+              setState(prev => {
+                // If a success callback already fired in the meantime, don't overwrite it
+                if (!prev.isFallback && prev.accuracy !== null && prev.accuracy < 5000) {
+                  return prev;
+                }
+                return {
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                  accuracy: 10000, // Approximate accuracy for IP-based
+                  error: null,
+                  loading: false,
+                  isFallback: true,
+                };
               });
             } else {
               throw new Error('Invalid IP geolocation data');
@@ -71,10 +89,17 @@ export function useGeolocation() {
       },
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
+
+    return watchId;
   };
 
   useEffect(() => {
-    getPosition();
+    const watchId = getPosition();
+    return () => {
+      if (watchId !== undefined && navigator.geolocation) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
   }, []);
 
   return {
