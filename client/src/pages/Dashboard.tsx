@@ -28,16 +28,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab })
 
   const [selectedIssue, setSelectedIssue] = useState<any | null>(null);
   const [showReportForm, setShowReportForm] = useState(false);
+  const [reportCoords, setReportCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const handleSelectIssue = (issue: any) => {
     setSelectedIssue(issue);
     setShowReportForm(false);
+    setReportCoords(null);
     // If on mobile map page, select will trigger popup. If on feed, we show details.
     setActiveTab('feed');
   };
 
   const handleReportSuccess = () => {
     setShowReportForm(false);
+    setReportCoords(null);
     refetch();
     setActiveTab('feed');
   };
@@ -52,9 +55,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab })
     if (showReportForm) {
       return (
         <ReportForm
-          onClose={() => setShowReportForm(false)}
-          userLatitude={geo.latitude}
-          userLongitude={geo.longitude}
+          onClose={() => {
+            setShowReportForm(false);
+            setReportCoords(null);
+          }}
+          userLatitude={reportCoords?.lat ?? geo.latitude}
+          userLongitude={reportCoords?.lng ?? geo.longitude}
           userAddress={geo.error ? 'Default Geolocation Location' : ''}
           onReportSuccess={handleReportSuccess}
         />
@@ -76,7 +82,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab })
         issues={issues}
         loading={loading}
         onSelectIssue={handleSelectIssue}
-        onReportClick={() => { setShowReportForm(true); setSelectedIssue(null); }}
+        onReportClick={() => {
+          setReportCoords({ lat: geo.latitude, lng: geo.longitude });
+          setShowReportForm(true);
+          setSelectedIssue(null);
+        }}
         filterStatus={filterStatus}
         setFilterStatus={setFilterStatus}
       />
@@ -91,6 +101,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab })
       centerLatitude={geo.latitude}
       centerLongitude={geo.longitude}
       interactive={showReportForm}
+      reportLatitude={reportCoords?.lat}
+      reportLongitude={reportCoords?.lng}
+      onLocationSelect={(lat, lng) => setReportCoords({ lat, lng })}
     />
   );
 

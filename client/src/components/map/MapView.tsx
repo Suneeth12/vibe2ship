@@ -11,6 +11,8 @@ interface MapViewProps {
   centerLongitude: number;
   interactive?: boolean;
   onLocationSelect?: (lat: number, lng: number) => void;
+  reportLatitude?: number;
+  reportLongitude?: number;
 }
 
 // Map center controller helper
@@ -47,6 +49,8 @@ export const MapView: React.FC<MapViewProps> = ({
   centerLongitude,
   interactive = false,
   onLocationSelect,
+  reportLatitude,
+  reportLongitude,
 }) => {
   
   // Custom SVG Markers
@@ -71,9 +75,11 @@ export const MapView: React.FC<MapViewProps> = ({
     });
   };
 
-  const center: [number, number] = selectedIssue 
-    ? [selectedIssue.latitude, selectedIssue.longitude] 
-    : [centerLatitude, centerLongitude];
+  const center: [number, number] = (interactive && reportLatitude !== undefined && reportLongitude !== undefined)
+    ? [reportLatitude, reportLongitude]
+    : selectedIssue 
+      ? [selectedIssue.latitude, selectedIssue.longitude] 
+      : [centerLatitude, centerLongitude];
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -95,6 +101,41 @@ export const MapView: React.FC<MapViewProps> = ({
         {/* Listen for selection click when in reporting mode */}
         {interactive && onLocationSelect && (
           <MapClickHandler onMapClick={onLocationSelect} />
+        )}
+
+        {/* Draggable Report Pin */}
+        {interactive && reportLatitude !== undefined && reportLongitude !== undefined && (
+          <Marker
+            position={[reportLatitude, reportLongitude]}
+            draggable={true}
+            icon={L.divIcon({
+              className: 'custom-leaflet-icon report-pin',
+              html: `
+                <svg width="32" height="42" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 0C7.16 0 0 7.16 0 16C0 26.5 16 42 16 42C16 42 32 26.5 32 16C32 7.16 24.84 0 16 0ZM16 22.5C12.41 22.5 9.5 19.59 9.5 16C9.5 12.41 12.41 9.5 16 9.5C19.59 9.5 22.5 12.41 22.5 16C22.5 19.59 19.59 22.5 16 22.5Z" fill="var(--civic-emerald)"/>
+                </svg>
+              `,
+              iconSize: [32, 42],
+              iconAnchor: [16, 42],
+              popupAnchor: [0, -40],
+            })}
+            eventHandlers={{
+              dragend: (event) => {
+                const marker = event.target;
+                const position = marker.getLatLng();
+                if (onLocationSelect) {
+                  onLocationSelect(position.lat, position.lng);
+                }
+              }
+            }}
+          >
+            <Popup>
+              <div style={{ padding: '4px' }}>
+                <strong style={{ display: 'block', fontSize: '12px' }}>Issue Location</strong>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Drag pin to adjust location</span>
+              </div>
+            </Popup>
+          </Marker>
         )}
 
         {/* Current User Geolocation marker */}
