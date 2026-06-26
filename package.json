@@ -8,13 +8,15 @@
   ],
   "scripts": {
     "bootstrap": "npm install",
-    "postinstall": "npm run build",
+    "postinstall": "npm run build:fast",
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
     "dev": "concurrently --kill-others-on-fail --prefix \"[{name}]\" --names \"server,client\" --prefix-colors \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
     "build:server": "npm run build -w server",
     "build:client": "npm run build -w client",
-    "build": "npm run build:server && npm run build:client",
+    "build:client:fast": "npm run build:fast -w client",
+    "build": "concurrently --kill-others-on-fail --prefix \"[{name}]\" --names \"server,client\" --prefix-colors \"cyan,magenta\" \"npm run build:server\" \"npm run build:client\"",
+    "build:fast": "concurrently --kill-others-on-fail --prefix \"[{name}]\" --names \"server,client\" --prefix-colors \"cyan,magenta\" \"npm run build:server\" \"npm run build:client:fast\"",
     "start": "npm run start -w server",
     "clean": "rimraf client/dist server/dist"
   },

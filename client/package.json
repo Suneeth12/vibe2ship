@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "concurrently --kill-others-on-fail --prefix \"[{name}]\" --names \"tsc,vite\" --prefix-colors \"blue,green\" \"tsc --noEmit\" \"vite build\"",
+    "build:fast": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
