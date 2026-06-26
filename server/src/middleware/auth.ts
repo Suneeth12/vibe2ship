@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { auth } from '../config/firebase';
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -21,6 +22,9 @@ export async function verifyAuth(req: AuthenticatedRequest, res: Response, next:
     
     // Support mock tokens for local testing and demo fallback session
     if (token.startsWith('demo_token_')) {
+      if (env.NODE_ENV === 'production') {
+        return res.status(401).json({ error: 'Mock authentication is disabled in production.' });
+      }
       const uid = token.replace('demo_token_', '');
       req.user = {
         uid: uid,

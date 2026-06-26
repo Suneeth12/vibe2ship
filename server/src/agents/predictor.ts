@@ -45,6 +45,9 @@ export async function runPredictor(): Promise<PredictionResult> {
     const isMock = !env.GEMINI_API_KEY || env.GEMINI_API_KEY === 'PLACEHOLDER';
     
     if (isMock) {
+      if (env.NODE_ENV === 'production') {
+        throw new Error('Gemini API predictor fallback is disabled in production.');
+      }
       return generateMockPredictions(issues);
     }
 
@@ -80,6 +83,9 @@ export async function runPredictor(): Promise<PredictionResult> {
     throw new Error('Empty response from Gemini Predictor');
   } catch (error) {
     logger.error({ error }, 'Failed to run Predictor agent');
+    if (env.NODE_ENV === 'production') {
+      throw error;
+    }
     // Mock fallback
     const fallback = generateMockPredictions([]);
     return fallback;
