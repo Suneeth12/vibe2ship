@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useIssues } from '../hooks/useIssues';
 import { useGeolocation } from '../hooks/useGeolocation';
 import Shell from '../components/layout/Shell';
@@ -53,6 +53,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab })
   const [diagnostics, setDiagnostics] = useState<any | null>(null);
   const [runningDiagnostics, setRunningDiagnostics] = useState(false);
 
+  // Tracks whether the component is still mounted so async probes don't setState
+  // after unmount.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const runDiagnostics = async () => {
     setRunningDiagnostics(true);
     const results: any = {
@@ -62,77 +71,51 @@ export const Dashboard: React.FC<DashboardProps> = ({ activeTab, setActiveTab })
       dbip: 'Running...',
       ipinfo: 'Running...'
     };
-    setDiagnostics({ ...results });
+    const publish = () => {
+      if (mountedRef.current) setDiagnostics({ ...results });
+    };
+    publish();
 
-    // 1. GPS High Accuracy
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          results.gpsHigh = `Success: Lat ${pos.coords.latitude.toFixed(4)}, Lng ${pos.coords.longitude.toFixed(4)} (Acc: ${pos.coords.accuracy}m)`;
-          setDiagnostics({ ...results });
-        },
-        (err) => {
-          results.gpsHigh = `Error ${err.code}: ${err.message}`;
-          setDiagnostics({ ...results });
-        },
-        { enableHighAccuracy: true, timeout: 6000 }
-      );
+    // Wrap each callback-based geolocation probe in a Promise so it can be awaited.
+    const probeGps = (key: 'gpsHigh' | 'gpsLow', enableHighAccuracy: boolean) =>
+      new Promise<void>((resolve) => {
+        if (!navigator.geolocation) {
+          results[key] = 'Not supported';
+          publish();
+          return resolve();
+        }
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            results[key] = `Success: Lat ${pos.coords.latitude.toFixed(4)}, Lng ${pos.coords.longitude.toFixed(4)} (Acc: ${pos.coords.accuracy}m)`;
+            publish();
+            resolve();
+          },
+          (err) => {
+            results[key] = `Error ${err.code}: ${err.message}`;
+            publish();
+            resolve();
+          },
+          { enableHighAccuracy, timeout: 6000 }
+        );
+      });
 
-      // 2. GPS Low Accuracy
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          results.gpsLow = `Success: Lat ${pos.coords.latitude.toFixed(4)}, Lng ${pos.coords.longitude.toFixed(4)} (Acc: ${pos.coords.accuracy}m)`;
-          setDiagnostics({ ...results });
-        },
-        (err) => {
-          results.gpsLow = `Error ${err.code}: ${err.message}`;
-          setDiagnostics({ ...results });
-        },
-        { enableHighAccuracy: false, timeout: 6000 }
-      );
-    } else {
-      results.gpsHigh = 'Not supported';
-      results.gpsLow = 'Not supported';
-      setDiagnostics({ ...results });
+    const probeIp = (key: 'ipapi' | 'dbip' | 'ipinfo', url: string, format: (data: any) => string) =>
+      fetch(url)
+        .then(r => r.json())
+        .then(data => { results[key] = format(data); publish(); })
+        .catch(e => { results[key] = `Failed: ${e.message}`; publish(); });
+
+    try {
+      await Promise.all([
+        probeGps('gpsHigh', true),
+        probeGps('gpsLow', false),
+        probeIp('ipapi', 'https://ipapi.co/json/', d => `Success: Lat ${d.latitude}, Lng ${d.longitude} (${d.city}, ${d.country_name})`),
+        probeIp('dbip', 'https://api.db-ip.com/v2/free/self', d => `Success: IP ${d.ipAddress} (${d.city}, ${d.countryName})`),
+        probeIp('ipinfo', 'https://ipinfo.io/json', d => `Success: Loc ${d.loc} (${d.city}, ${d.country})`),
+      ]);
+    } finally {
+      if (mountedRef.current) setRunningDiagnostics(false);
     }
-
-    // 3. IP Geolocation (ipapi.co)
-    fetch('https://ipapi.co/json/')
-      .then(r => r.json())
-      .then(data => {
-        results.ipapi = `Success: Lat ${data.latitude}, Lng ${data.longitude} (${data.city}, ${data.country_name})`;
-        setDiagnostics({ ...results });
-      })
-      .catch(e => {
-        results.ipapi = `Failed: ${e.message}`;
-        setDiagnostics({ ...results });
-      });
-
-    // 4. IP Geolocation (db-ip.com)
-    fetch('https://api.db-ip.com/v2/free/self')
-      .then(r => r.json())
-      .then(data => {
-        results.dbip = `Success: IP ${data.ipAddress} (${data.city}, ${data.countryName})`;
-        setDiagnostics({ ...results });
-      })
-      .catch(e => {
-        results.dbip = `Failed: ${e.message}`;
-        setDiagnostics({ ...results });
-      });
-
-    // 5. IP Geolocation (ipinfo.io)
-    fetch('https://ipinfo.io/json')
-      .then(r => r.json())
-      .then(data => {
-        results.ipinfo = `Success: Loc ${data.loc} (${data.city}, ${data.country})`;
-        setDiagnostics({ ...results });
-      })
-      .catch(e => {
-        results.ipinfo = `Failed: ${e.message}`;
-        setDiagnostics({ ...results });
-      });
-
-    setRunningDiagnostics(false);
   };
 
   const renderLeftPanel = () => {

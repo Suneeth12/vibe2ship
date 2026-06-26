@@ -88,11 +88,13 @@ export const MapView: React.FC<MapViewProps> = ({
   }, [issues]);
 
   // Custom SVG Markers
+  // NOTE: SVG presentation attributes (fill="...") do not resolve CSS custom
+  // properties (var(--x)), so concrete hex colors must be used here.
   const createMarkerIcon = (status: string) => {
-    let color = 'var(--status-warning)'; // Pending = Yellow
-    if (status === 'Community Verified') color = 'var(--status-info)'; // Verified = Blue
-    if (status === 'Resolved') color = 'var(--status-success)'; // Resolved = Green
-    if (status === 'Rejected') color = 'var(--status-critical)'; // Rejected = Red
+    let color = '#FBD34D'; // Pending = Yellow (--status-warning)
+    if (status === 'Community Verified') color = '#3B82F6'; // Verified = Blue (--status-info)
+    if (status === 'Resolved') color = '#22C55E'; // Resolved = Green (--status-success)
+    if (status === 'Rejected') color = '#EF4444'; // Rejected = Red (--status-critical)
 
     const svgHtml = `
       <svg width="32" height="42" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,8 +137,8 @@ export const MapView: React.FC<MapViewProps> = ({
             key={`hotspot-${idx}`}
             center={[hotspot.lat, hotspot.lng]}
             pathOptions={{
-              color: 'var(--status-critical, #ef4444)',
-              fillColor: 'var(--status-critical, #ef4444)',
+              color: '#EF4444',
+              fillColor: '#EF4444',
               fillOpacity: 0.2,
               weight: 1.5,
               dashArray: '5, 5'
@@ -173,7 +175,7 @@ export const MapView: React.FC<MapViewProps> = ({
               className: 'custom-leaflet-icon report-pin',
               html: `
                 <svg width="32" height="42" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 0C7.16 0 0 7.16 0 16C0 26.5 16 42 16 42C16 42 32 26.5 32 16C32 7.16 24.84 0 16 0ZM16 22.5C12.41 22.5 9.5 19.59 9.5 16C9.5 12.41 12.41 9.5 16 9.5C19.59 9.5 22.5 12.41 22.5 16C22.5 19.59 19.59 22.5 16 22.5Z" fill="var(--civic-emerald)"/>
+                  <path d="M16 0C7.16 0 0 7.16 0 16C0 26.5 16 42 16 42C16 42 32 26.5 32 16C32 7.16 24.84 0 16 0ZM16 22.5C12.41 22.5 9.5 19.59 9.5 16C9.5 12.41 12.41 9.5 16 9.5C19.59 9.5 22.5 12.41 22.5 16C22.5 19.59 19.59 22.5 16 22.5Z" fill="#14B8A6"/>
                 </svg>
               `,
               iconSize: [32, 42],

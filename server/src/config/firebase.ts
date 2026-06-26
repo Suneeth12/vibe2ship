@@ -98,7 +98,9 @@ class DynamicFirestore {
     try {
       return await operation(this.getDb());
     } catch (err: any) {
-      if (err.message && (err.message.includes('API has not been used') || err.message.includes('PERMISSION_DENIED') || err.code === 7)) {
+      const isKnownFallback = err.message && (err.message.includes('API has not been used') || err.message.includes('PERMISSION_DENIED') || err.code === 7);
+      // In development, also fall back for credential/token failures (e.g. local dummy service account).
+      if ((isKnownFallback || env.NODE_ENV !== 'production') && !this.isFallback) {
         this.switchToMock();
         return await operation(this.getDb());
       }

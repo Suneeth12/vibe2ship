@@ -151,12 +151,43 @@
       "reasoning": "Obstruction creates safety hazard for cyclists.",
       "createdAt": "2026-06-24T05:12:26.691Z",
       "updatedAt": "2026-06-24T05:12:26.691Z"
+    },
+    "cq41guukv5r": {
+      "reporterId": "open311_agent",
+      "mediaUrl": "",
+      "mediaType": "image/jpeg",
+      "description": "test at equator",
+      "latitude": 0,
+      "longitude": 0,
+      "address": "Open311 Geocoded at Lat: 0, Lng: 0",
+      "category": "pothole",
+      "subcategory": "Open311 Report",
+      "severity": "medium",
+      "priorityScore": 5,
+      "suggestedDepartment": "Public Works",
+      "department": "Public Works",
+      "status": "Pending",
+      "confidence": 1,
+      "tags": [
+        "open311",
+        "pothole"
+      ],
+      "reasoning": "Imported via Open311 API protocol.",
+      "consensusScore": 0,
+      "votesCount": 0,
+      "createdAt": "2026-06-26T15:44:56.890Z",
+      "updatedAt": "2026-06-26T15:44:56.890Z",
+      "open311": {
+        "service_code": "001",
+        "service_request_id": "req_cq41guuk",
+        "agency_responsible": "Public Works"
+      }
     }
   },
   "verifications": {},
   "health_check": {
     "ping": {
-      "timestamp": "2026-06-26T07:51:07.207Z"
+      "timestamp": "2026-06-26T15:30:00.035Z"
     }
   }
 }

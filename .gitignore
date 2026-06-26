@@ -87,3 +87,7 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Firebase service account keys (never commit these)
+*-firebase-adminsdk-*.json
+local-sa.json

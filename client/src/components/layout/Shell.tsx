@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import { Compass, List, Trophy, User } from '@phosphor-icons/react';
 
@@ -17,8 +17,37 @@ export const Shell: React.FC<ShellProps> = ({
 }) => {
   const [mobileShowMap, setMobileShowMap] = useState(false);
 
+  // Static responsive CSS — built once. The content/map toggle is driven by a
+  // class on the container (below) rather than interpolating into this string,
+  // so it isn't rebuilt on every render.
+  const responsiveStyles = useMemo(() => `
+    @media (max-width: 768px) {
+      .shell-container {
+        flex-direction: column;
+      }
+      .sidebar-desktop {
+        display: none !important;
+      }
+      .main-content {
+        margin-bottom: 64px; /* offset bottom nav */
+      }
+      .content-panel { width: 100% !important; }
+      .map-panel { width: 100% !important; }
+      .shell-container.show-content .content-panel { display: flex !important; }
+      .shell-container.show-content .map-panel { display: none !important; }
+      .shell-container.show-map .content-panel { display: none !important; }
+      .shell-container.show-map .map-panel { display: block !important; }
+      .mobile-map-toggle {
+        display: flex !important;
+      }
+      .mobile-nav {
+        display: flex !important;
+      }
+    }
+  `, []);
+
   return (
-    <div className="shell-container" style={{
+    <div className={`shell-container ${mobileShowMap ? 'show-map' : 'show-content'}`} style={{
       display: 'flex',
       height: '100vh',
       width: '100vw',
@@ -134,33 +163,7 @@ export const Shell: React.FC<ShellProps> = ({
       </nav>
 
       {/* Media Queries (Injected Inline Styles because of vanilla approach) */}
-      <style>{`
-        @media (max-width: 768px) {
-          .shell-container {
-            flex-direction: column;
-          }
-          .sidebar-desktop {
-            display: none !important;
-          }
-          .main-content {
-            margin-bottom: 64px; /* offset bottom nav */
-          }
-          .content-panel {
-            width: 100% !important;
-            display: ${mobileShowMap ? 'none !important' : 'flex !important'};
-          }
-          .map-panel {
-            width: 100% !important;
-            display: ${mobileShowMap ? 'block !important' : 'none !important'};
-          }
-          .mobile-map-toggle {
-            display: flex !important;
-          }
-          .mobile-nav {
-            display: flex !important;
-          }
-        }
-      `}</style>
+      <style>{responsiveStyles}</style>
     </div>
   );
 };

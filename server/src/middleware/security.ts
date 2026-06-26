@@ -32,7 +32,7 @@ export const helmetMiddleware = helmet({
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 });
 
-const allowedOrigins = env.ALLOWED_ORIGINS.split(',');
+const allowedOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean);
 
 export const corsMiddleware = cors({
   origin: (origin, callback) => {

@@ -50,9 +50,23 @@ export function useIssues(lat?: number, lng?: number, radius = 5000, status = 'a
   useEffect(() => {
     setLoading(true);
 
-    // 1. Try real-time Firestore listener first
-    let unsubscribe: () => void = () => {};
-    
+    // Track the Firestore listener and the polling interval separately so that
+    // a fallback to polling never overwrites (and leaks) the original listener,
+    // and repeated errors can't stack multiple intervals.
+    let unsubscribeFn: (() => void) | null = null;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const startPolling = () => {
+      if (intervalId) return; // already polling
+      fetchIssuesViaApi();
+      intervalId = setInterval(fetchIssuesViaApi, 5000);
+    };
+
+    const cleanup = () => {
+      if (unsubscribeFn) unsubscribeFn();
+      if (intervalId) clearInterval(intervalId);
+    };
+
     try {
       if (db && typeof db.app !== 'undefined' && !isMockFirebase) {
         const issuesQuery = query(
@@ -60,7 +74,7 @@ export function useIssues(lat?: number, lng?: number, radius = 5000, status = 'a
           orderBy('createdAt', 'desc')
         );
 
-        unsubscribe = onSnapshot(
+        unsubscribeFn = onSnapshot(
           issuesQuery,
           (snapshot) => {
             const list: Issue[] = [];
@@ -90,26 +104,19 @@ export function useIssues(lat?: number, lng?: number, radius = 5000, status = 'a
           },
           (err) => {
             console.warn('Firestore onSnapshot failed, falling back to API polling:', err);
-            fetchIssuesViaApi();
-            // Start API polling interval
-            const interval = setInterval(fetchIssuesViaApi, 5000);
-            unsubscribe = () => clearInterval(interval);
+            startPolling();
           }
         );
       } else {
         // Fallback directly to API if Firebase client is not connected
-        fetchIssuesViaApi();
-        const interval = setInterval(fetchIssuesViaApi, 5000);
-        unsubscribe = () => clearInterval(interval);
+        startPolling();
       }
     } catch (err) {
       console.warn('Firestore setup crashed, falling back to API polling:', err);
-      fetchIssuesViaApi();
-      const interval = setInterval(fetchIssuesViaApi, 5000);
-      unsubscribe = () => clearInterval(interval);
+      startPolling();
     }
 
-    return () => unsubscribe();
+    return cleanup;
   }, [lat, lng, radius, status]);
 
   return {

@@ -9,7 +9,7 @@ interface IssueCardProps {
 }
 
 export const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick }) => {
-  const formattedDate = new Date(issue.createdAt).toLocaleDateString(undefined, {
+  const formattedDate = new Date(issue.createdAt).toLocaleString(undefined, {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 

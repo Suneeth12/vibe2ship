@@ -51,11 +51,27 @@ router.get('/services.json', (req: Request, res: Response) => {
 router.post('/requests.json', async (req: Request, res: Response) => {
   const { service_code, description, lat, long, media_url } = req.body;
 
-  if (!service_code || !description || !lat || !long) {
+  if (!service_code || !description || lat == null || long == null) {
     return res.status(400).json([
       {
         code: '400',
         description: 'Missing required parameters: service_code, description, lat, long'
+      }
+    ]);
+  }
+
+  // Validate coordinates are real, in-range numbers (note: 0 is a valid coordinate).
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(long);
+  if (
+    Number.isNaN(latitude) || Number.isNaN(longitude) ||
+    latitude < -90 || latitude > 90 ||
+    longitude < -180 || longitude > 180
+  ) {
+    return res.status(400).json([
+      {
+        code: '400',
+        description: 'Invalid coordinates: lat must be -90..90 and long must be -180..180'
       }
     ]);
   }
@@ -78,8 +94,8 @@ router.post('/requests.json', async (req: Request, res: Response) => {
       mediaUrl: media_url || '',
       mediaType: 'image/jpeg',
       description,
-      latitude: parseFloat(lat),
-      longitude: parseFloat(long),
+      latitude,
+      longitude,
       address: `Open311 Geocoded at Lat: ${lat}, Lng: ${long}`,
       category,
       subcategory: 'Open311 Report',
