@@ -32,6 +32,10 @@ import * as path from 'path';
 // 5. Connect Routes
 app.use(healthRouter); // GET /health is public at root
 app.use('/api/issues', issuesRouter);
+app.get('/api/heatmap', (req, res, next) => {
+  req.url = '/heatmap';
+  issuesRouter(req, res, next);
+});
 app.use('/api/verifications', verificationsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/open311', open311Router);

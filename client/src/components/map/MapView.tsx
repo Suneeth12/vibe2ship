@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useEffect, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
-import { Issue } from '../../hooks/useIssues';
+import { Issue, getDistance } from '../../hooks/useIssues';
 
 interface MapViewProps {
   issues: Issue[];
@@ -53,6 +53,40 @@ export const MapView: React.FC<MapViewProps> = ({
   reportLongitude,
 }) => {
   
+  // Dynamic Heatmap Hotspots Calculation
+  const hotspots = useMemo(() => {
+    const list: Array<{ lat: number; lng: number; count: number }> = [];
+    const visited = new Set<string>();
+
+    const densities = issues.map(issue => {
+      const nearby = issues.filter(other => 
+        getDistance(issue.latitude, issue.longitude, other.latitude, other.longitude) <= 400
+      );
+      return {
+        issue,
+        count: nearby.length,
+        nearby
+      };
+    });
+
+    densities.sort((a, b) => b.count - a.count);
+
+    for (const item of densities) {
+      if (visited.has(item.issue.id)) continue;
+      
+      // If at least 2 issues are clustered within 400 meters, it forms a hotspot
+      if (item.count >= 2) {
+        list.push({
+          lat: item.issue.latitude,
+          lng: item.issue.longitude,
+          count: item.count
+        });
+        item.nearby.forEach(nb => visited.add(nb.id));
+      }
+    }
+    return list;
+  }, [issues]);
+
   // Custom SVG Markers
   const createMarkerIcon = (status: string) => {
     let color = 'var(--status-warning)'; // Pending = Yellow
@@ -94,6 +128,33 @@ export const MapView: React.FC<MapViewProps> = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        {/* Render Heatmap Circles */}
+        {!interactive && hotspots.map((hotspot, idx) => (
+          <Circle
+            key={`hotspot-${idx}`}
+            center={[hotspot.lat, hotspot.lng]}
+            pathOptions={{
+              color: 'var(--status-critical, #ef4444)',
+              fillColor: 'var(--status-critical, #ef4444)',
+              fillOpacity: 0.2,
+              weight: 1.5,
+              dashArray: '5, 5'
+            }}
+            radius={350}
+          >
+            <Popup>
+              <div style={{ padding: '4px', minWidth: '140px' }}>
+                <strong style={{ display: 'block', color: 'var(--status-critical, #ef4444)', fontSize: '12px', marginBottom: '2px' }}>
+                  ⚠️ Critical Hotspot Zone
+                </strong>
+                <span style={{ fontSize: '11px', color: 'var(--text-high)' }}>
+                  {hotspot.count} incidents reported within 400m
+                </span>
+              </div>
+            </Popup>
+          </Circle>
+        ))}
 
         {/* Sync Map View */}
         <ChangeMapView center={center} zoom={selectedIssue ? 16 : 13} />

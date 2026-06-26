@@ -187,4 +187,29 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
   }
 });
 
+// GET /heatmap - Get all active issue coordinates for heatmap visualization
+router.get('/heatmap', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const snapshot = await db.collection('issues').get();
+    const coords: any[] = [];
+    
+    snapshot.forEach((doc: any) => {
+      const data = doc.data();
+      if (data.status !== 'Rejected') {
+        coords.push({
+          latitude: data.latitude,
+          longitude: data.longitude,
+          severity: data.severity,
+          consensusScore: data.consensusScore || 0
+        });
+      }
+    });
+    
+    res.json(coords);
+  } catch (error) {
+    logger.error({ error }, 'Error fetching heatmap coords');
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
