@@ -16,11 +16,11 @@ interface MapViewProps {
 }
 
 // Map center controller helper
-const ChangeMapView: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
+const ChangeMapView: React.FC<{ lat: number; lng: number; zoom: number }> = ({ lat, lng, zoom }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
+    map.setView([lat, lng], zoom);
+  }, [lat, lng, zoom, map]);
   return null;
 };
 
@@ -157,7 +157,7 @@ export const MapView: React.FC<MapViewProps> = ({
         ))}
 
         {/* Sync Map View */}
-        <ChangeMapView center={center} zoom={selectedIssue ? 16 : 13} />
+        <ChangeMapView lat={center[0]} lng={center[1]} zoom={selectedIssue ? 16 : 13} />
 
         {/* Listen for selection click when in reporting mode */}
         {interactive && onLocationSelect && (

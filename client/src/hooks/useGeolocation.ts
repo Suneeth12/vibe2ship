@@ -44,14 +44,32 @@ export function useGeolocation() {
         });
       },
       (error) => {
-        console.warn('Geolocation access failed. Using Seattle default coordinates.', error.message);
-        setState(prev => ({
-          ...prev,
-          error: `Failed to retrieve GPS location: ${error.message}. Using default location.`,
-          loading: false,
-        }));
+        console.warn('Geolocation access failed. Trying IP-based geolocation fallback...', error.message);
+        fetch('https://ipapi.co/json/')
+          .then(res => res.json())
+          .then(data => {
+            if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+              setState({
+                latitude: data.latitude,
+                longitude: data.longitude,
+                accuracy: 10000,
+                error: null,
+                loading: false,
+              });
+            } else {
+              throw new Error('Invalid IP geolocation data');
+            }
+          })
+          .catch(ipErr => {
+            console.error('IP-based geolocation also failed:', ipErr);
+            setState(prev => ({
+              ...prev,
+              error: `Failed to retrieve GPS/IP location. Using default location.`,
+              loading: false,
+            }));
+          });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
   };
 
